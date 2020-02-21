@@ -248,7 +248,7 @@ function ts_utils.append(schema_name, tags_and_metrics, timestamp)
 
   local rv = true
 
-  --traceError(TRACE_NORMAL, TRACE_CONSOLE, "TS.UPDATE [".. schema.name .."] " .. table.tconcat(tags_and_metrics, "=", ","))
+  traceError(TRACE_NORMAL, TRACE_CONSOLE, "TS.UPDATE [".. schema.name .."] " .. table.tconcat(tags_and_metrics, "=", ","))
 
   ts_common.clearLastError()
 
