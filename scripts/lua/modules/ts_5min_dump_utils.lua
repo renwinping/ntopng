@@ -128,6 +128,7 @@ end
 -- ########################################################
 
 function ts_dump.sflow_device_update_rrds(when, ifstats, verbose)
+  print ("["..__FILE__()..":"..__LINE__().."] Processing sFlow device "..sflow_device_update_rrds.."\n")
   local flowdevs = interface.getSFlowDevices()
 
   for flow_device_ip,_ in pairs(flowdevs) do
