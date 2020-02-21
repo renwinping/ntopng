@@ -257,6 +257,7 @@ local function dumpTopTalkers(_ifname, ifstats, verbose)
 	 print(talkers)
       end
 
+      print(talkers)
       ntop.insertMinuteSampling(ifstats.id, talkers)
    end
 end
