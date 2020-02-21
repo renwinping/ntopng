@@ -12,7 +12,7 @@ local ts_utils = require("ts_utils_core")
 require("ts_second")
 
 -- Toggle debug
-local enable_second_debug = false
+local enable_second_debug = true
 local ifnames = interface.getIfNames()
 
 -- NOTE: must use gettimeofday otherwise the seconds may not correspond
