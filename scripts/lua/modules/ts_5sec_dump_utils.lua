@@ -45,6 +45,7 @@ end
 -- ########################################################
 
 function ts_dump.run_5sec_dump(ifid, when, periodic_ht_state_update_stats)
+   --print ("#####["..":".."] enter run_5sec_dump ".."run_5sec_dump".."\n")
    local iface_rrd_creation_enabled = (ntop.getPref("ntopng.prefs.ifid_"..ifid..".interface_rrd_creation") ~= "false")
       and (ntop.getPref("ntopng.prefs.interface_rrd_creation") ~= "0")
 
@@ -52,8 +53,11 @@ function ts_dump.run_5sec_dump(ifid, when, periodic_ht_state_update_stats)
       return
    end
 
+   --print ("#####["..":".."] iface_update_periodic_ht_state_update_stats ".."\n")
    ts_dump.iface_update_periodic_ht_state_update_stats(when, ifid, periodic_ht_state_update_stats)
+   --print ("#####["..":".."] update_user_scripts_stats ".."\n")
    ts_dump.update_user_scripts_stats(when, ifid, verbose)
+   --print ("#####["..":".."] leave run_5sec_dump ".."run_5sec_dump".."\n")
 end
 
 -- ########################################################
