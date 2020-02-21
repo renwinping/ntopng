@@ -81,6 +81,7 @@ function ts_common.calculateStatistics(total_serie, step, tdiff, data_type)
     total = nil
   end
 
+  --返回一个表格
   return {
     total = total,
     average = avg,
@@ -92,6 +93,8 @@ end
 
 -- NOTE: this corresponds to graph_utils interpolateSerie
 -- This is approximate
+
+--插值算法
 function ts_common.upsampleSerie(serie, num_points)
   if num_points <= #serie then
     return serie
@@ -150,7 +153,7 @@ function ts_common.getMaxPointValue(schema, metric, tags)
 end
 
 -- ##############################################
-
+--正规值化值，用于解决部分数值不规范问题---comment by rwp 20200215
 function ts_common.normalizeVal(v, max_val, options)
   -- it's undesirable to normalize and set a 0 when
   -- the number is greater than max value
