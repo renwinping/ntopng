@@ -255,7 +255,8 @@ local function handle_old_rrd_tune(schema, rrdfile)
   end
 
   os.rename(rrdfile, rrdfile .. ".bak")
-
+  
+  traceError(TRACE_WARNING, TRACE_CONSOLE, "RRD format file will created after create_rrd"..rrdfile.." @@")
   if(not create_rrd(schema, rrdfile)) then
     return false
   end
@@ -317,6 +318,7 @@ end
 -- ##############################################
 
 local function update_rrd(schema, rrdfile, timestamp, data, dont_recover)
+  --print ("[".."]".."enter update_rrd()"..rrdfile.."\n")
   local params = {tolongint(timestamp), }
 
   if isDebugEnabled() then
@@ -510,7 +512,10 @@ function driver:query(schema, tstart, tend, tags, options)
 
   touchRRD(rrdfile)
 
-  --tprint("rrdtool fetch ".. rrdfile.. " " .. getConsolidationFunction(schema) .. " -s ".. tstart .. " -e " .. tend)
+	traceError(TRACE_NORMAL, TRACE_CONSOLE, "rrdtool fetch ".. rrdfile.. " " .. getConsolidationFunction(schema) .. " -s ".. tstart .. " -e " .. tend)
+  tprint("rrdtool fetch ".. rrdfile.. " " .. getConsolidationFunction(schema) .. " -s ".. tstart .. " -e " .. tend)
+  
+  --调用ntop取列值--comment by rwp 20200215
   local fstart, fstep, fdata, fend, fcount = ntop.rrd_fetch_columns(rrdfile, getConsolidationFunction(schema), tstart, tend)
 
   if fdata == nil then
@@ -520,6 +525,7 @@ function driver:query(schema, tstart, tend, tags, options)
   local count = 0
   local series = {}
 
+  --转换文件数到多个“序列”曲线
   for name_key, serie in pairs(fdata) do
     local serie_idx = map_rrd_column_to_metrics(schema, name_key)
     local name = schema._metrics[serie_idx]
@@ -556,6 +562,7 @@ function driver:query(schema, tstart, tend, tags, options)
   local total_serie = nil
   local stats = nil
 
+  --计算统计值
   if options.calculate_stats then
     total_serie = makeTotalSerie(series, count)
     stats = ts_common.calculateStatistics(makeTotalSerie(unsampled_series, unsampled_count), unsampled_fstep, tend - tstart, schema.options.metrics_type)
@@ -571,6 +578,7 @@ function driver:query(schema, tstart, tend, tags, options)
       local max_val = ts_common.getMaxPointValue(schema, name, tags)
       local ptval = ts_common.normalizeVal(values[1], max_val, options)
 
+      --插入表头
       table.insert(series[serie_idx].data, 1, ptval)
     end
 
@@ -586,6 +594,8 @@ function driver:query(schema, tstart, tend, tags, options)
     stats = table.merge(stats, ts_common.calculateMinMax(total_serie))
   end
 
+	tprint("rrdtool fetch result".. " -s ".. fstart .. " step " .. fstep.." count " .. count)
+	tprint(series)
   return {
     start = fstart,
     step = fstep,
