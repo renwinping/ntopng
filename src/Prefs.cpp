@@ -1760,6 +1760,7 @@ void Prefs::refreshDeviceProtocolsPolicyPref() {
 void Prefs::registerNetworkInterfaces() {
   for(int i = 0; i < num_deferred_interfaces_to_register; i++) {
     if(deferred_interfaces_to_register[i] != NULL) {
+	  ntop->getTrace()->traceEvent(TRACE_WARNING, "add nework interface(name:%s) in registerNetworkInterfaces()",deferred_interfaces_to_register[i]);
       add_network_interface(deferred_interfaces_to_register[i], NULL);
       free(deferred_interfaces_to_register[i]);
       deferred_interfaces_to_register[i] = NULL;

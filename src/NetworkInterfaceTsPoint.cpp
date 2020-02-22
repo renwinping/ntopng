@@ -41,3 +41,10 @@ void NetworkInterfaceTsPoint::lua(lua_State* vm, NetworkInterface *iface) {
   lua_insert(vm, -2);
   lua_settable(vm, -3);
 }
+
+string NetworkInterfaceTsPoint::json()
+{
+	char tempChar[256] = "";
+	snprintf(tempChar, 255, "%u", hosts);
+	return tempChar;
+}

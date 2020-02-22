@@ -314,6 +314,7 @@ void Ntop::registerPrefs(Prefs *_prefs, bool quick_registration) {
 
   if(quick_registration) return;
 
+  getTrace()->traceEvent(TRACE_WARNING, "intance the system interface");//add by rwp 20200218
   system_interface = new NetworkInterface(SYSTEM_INTERFACE_NAME, SYSTEM_INTERFACE_NAME);
 
   /* License check could have increased the number of interfaces available */
@@ -2591,4 +2592,47 @@ ndpi_protocol_category_t Ntop::get_ndpi_proto_category(u_int protoid) {
 
 void Ntop::setnDPIProtocolCategory(u_int16_t protoId, ndpi_protocol_category_t protoCategory) {
   ndpi_set_proto_category(get_ndpi_struct(), protoId, protoCategory);
+}
+
+int Ntop::registerMqttCli() {
+#define NTOPNG_ID 103
+	m_pLocalCom = new CIntecomWrapper(NTOPNG_ID);
+	if (NULL == m_pLocalCom)
+	{
+		return -1;
+	}
+
+	if (0 != m_pLocalCom->InitLibrary(LIBNAME_KMQTTCLI))
+	{
+		getTrace()->traceEvent(TRACE_WARNING, "init library(%s) failed.", LIBNAME_KMQTTCLI);
+		return -1;
+	}
+
+	KYMSGER_CFG config;
+	config.msgrId = 103;//固定分配的msgId
+	config.BufLengh = 2048;
+	strcpy(config.localIp, "127.0.0.1");
+	config.localPort = 1000;
+	strcpy(config.remoteIp, "127.0.0.1");
+	config.remoteport = 1883;
+	config.pTimeOut = 1000;
+	config.netWay = 0;
+	config.role = MSG_ROLE_RECEIR;//仅发送者
+	//config.logInfo = m_staMgrCfg.logInfo;
+	//snprintf(config.logInfo.logRootPath, 255, "%s/%s", m_staMgrCfg.logInfo.logRootPath, "synchr");
+
+	m_pLocalCom->setMsgHandler(NULL, this);
+	//InitSubMenu();
+	if (0 != m_pLocalCom->init(&config))
+	{
+		getTrace()->traceEvent(TRACE_WARNING,"init mqtt bus failed.");
+		return -1;
+	}
+
+	return 0;
+}
+
+int Ntop::SendMq(ASDUMESSGE* pMsg)
+{
+	return 0;
 }

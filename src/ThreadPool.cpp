@@ -90,16 +90,24 @@ void ThreadPool::run() {
     q = dequeueJob(true);
 
 #ifdef THREAD_DEBUG
-    ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** Dequeued job [%u][terminating=%d][%s][%s]",
-				 pthread_self(), isTerminating(), q->script_path, q->iface->get_name());
+    ntop->getTrace()->traceEvent(TRACE_NORMAL, "*** Dequeued job [%u][terminating=%d][%s]",
+				 pthread_self(), isTerminating(), q->script_path/*, q->iface->get_name()*/);
 #endif
     
     if((q == NULL) || isTerminating()) {
       if(q) delete q;
       break;
     } else {
+#ifdef THREAD_DEBUG  
+		ntop->getTrace()->traceEvent(TRACE_NORMAL, "***begin dequeue job runScript [%u][q->script_path=%s]",
+			pthread_self(), q->script_path);
+#endif
       Utils::setThreadName(q->script_path);
       (q->j)->runScript(q->script_path, q->iface, q->deadline);
+#ifdef THREAD_DEBUG  
+	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "***finish dequeue job runScript [%u][q->script_path=%s]",
+		  pthread_self(), q->script_path);
+#endif
       delete q;
     }
   }

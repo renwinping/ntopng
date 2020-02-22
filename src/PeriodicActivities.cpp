@@ -159,6 +159,8 @@ void PeriodicActivities::startPeriodicActivitiesLoop() {
             d->reuse_vm,
 						d->pool);
     if(ta) {
+	  //为了调试方便增加
+	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "PeriodicActivities's periodic activity (script:%s,period:%u) start", d->path,d->periodicity);
       activities[num_activities++] = ta;
       ta->run();
     }

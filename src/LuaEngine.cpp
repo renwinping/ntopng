@@ -4184,6 +4184,7 @@ static int ntop_interface_live_capture(lua_State* vm) {
       c->live_capture.bpfFilterSet = true;
   }
 
+  //注册条件给程序让disiscartPacket让异步导出实时文件io通道---comment by rwp 20200113
   if(ntop_interface->registerLiveCapture(c, &capture_id)) {
     ntop->getTrace()->traceEvent(TRACE_INFO,
 				 "Starting live capture id %d",
@@ -4765,6 +4766,8 @@ static int ntop_capture_to_pcap(lua_State* vm) {
 	   ntop_interface->get_name(), (unsigned int)time(NULL));
   c->pkt_capture.dumper = pcap_dump_open(pcap_open_dead(DLT_EN10MB, 1514 /* MTU */), ftemplate);
 
+  ntop->getTrace()->traceEvent(TRACE_WARNING, "read to create dump file %s\n", ftemplate);
+
   if(c->pkt_capture.dumper == NULL) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to create dump file %s\n", ftemplate);
     return(CONST_LUA_ERROR);
@@ -4859,6 +4862,16 @@ static int ntop_rrd_create(lua_State* vm) {
 }
 
 /* ****************************************** */
+/* in rrd.lua
+if(ds_count == 1) then
+ntop.rrd_update(rrdname, tdiff.."", "0")
+elseif(ds_count == 2) then
+ntop.rrd_update(rrdname, tdiff.."", "0", "0")
+elseif(ds_count == 3) then
+ntop.rrd_update(rrdname, tdiff.."", "0", "0", "0")
+end
+
+*/
 
 static int ntop_rrd_update(lua_State* vm) {
   const char *filename, *when = NULL, *v1 = NULL, *v2 = NULL, *v3 = NULL;
@@ -4948,7 +4961,7 @@ static int ntop_rrd_get_lastupdate(const char *filename, time_t *last_update, un
 }
 
 /* ****************************************** */
-
+//  local last, ds_count = ntop.rrd_lastupdate(rrdname) in rrd.lua
 static int ntop_rrd_lastupdate(lua_State* vm) {
   const char *filename;
   time_t    last_update;
@@ -5200,6 +5213,7 @@ static int ntop_rrd_fetch_columns(lua_State* vm) {
 
   reset_rrd_state();
 
+  //提取4参数--comment by rwp 2020-02-15
   if((status = __ntop_rrd_args(vm, &filename,
 			       &cf, &start, &end)) != CONST_LUA_OK) {
     return status;
@@ -5207,6 +5221,7 @@ static int ntop_rrd_fetch_columns(lua_State* vm) {
 
   ntop->getTrace()->traceEvent(TRACE_INFO, "%s(%s)", __FUNCTION__, filename);
 
+  //实际读取文件数据
   if((status = __ntop_rrd_status(vm,
 				 rrd_fetch_r(filename, cf, &start,
 					     &end, &step, &ds_cnt,
@@ -10932,7 +10947,7 @@ static const luaL_Reg ntop_interface_reg[] = {
   { "hasHighResTs",             ntop_interface_has_high_res_ts },
   { "getStats",                 ntop_get_interface_stats },
   { "getStatsUpdateFreq",       ntop_get_interface_stats_update_freq },
-  { "getInterfaceTimeseries",   ntop_get_interface_timeseries },
+  { "getInterfaceTimeseries",   ntop_get_interface_timeseries },//提取接口的timeseries数据到lua堆栈
   { "resetCounters",            ntop_interface_reset_counters },
   { "resetHostStats",           ntop_interface_reset_host_stats },
   { "deleteHostData",           ntop_interface_delete_host_data },
@@ -11110,12 +11125,12 @@ static const luaL_Reg ntop_interface_reg[] = {
 #endif
 
   /* Live Capture */
-  { "liveCapture",            ntop_interface_live_capture             },
-  { "stopLiveCapture",        ntop_interface_stop_live_capture        },
-  { "dumpLiveCaptures",       ntop_interface_dump_live_captures       },
+  { "liveCapture",            ntop_interface_live_capture             },//设置条件让C++可以"live_capture"，最多四个live_capture条件---comment by rwp20200113
+  { "stopLiveCapture",        ntop_interface_stop_live_capture        },//取消条件，停止
+  { "dumpLiveCaptures",       ntop_interface_dump_live_captures       },//导出live_capture的状态
 
   /* Packet Capture */
-  { "captureToPcap",          ntop_capture_to_pcap                    },
+  { "captureToPcap",          ntop_capture_to_pcap                    },//倒出接口的包到文件
   { "isCaptureRunning",       ntop_is_capture_running                 },
   { "stopRunningCapture",     ntop_stop_running_capture               },
 
@@ -12242,6 +12257,8 @@ int LuaEngine::handle_script_request(struct mg_connection *conn,
     rc = __ntop_lua_handlefile(L, script_path, true);
   else
 #endif
+
+	  ntop->getTrace()->traceEvent(TRACE_WARNING, "###################Script begin to do [%s]", script_path);//调试时关注---add by rwp 20200203
     rc = luaL_dofile(L, script_path);
 
   if(rc != 0) {

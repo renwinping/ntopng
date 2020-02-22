@@ -50,6 +50,7 @@ bool TimeseriesRing::isTimeToInsert() {
     status_shadow = NULL;
   }
 
+  //num_slots相当于“纵向槽”用于描述时间的x轴---comment by rwp 20200221
   /* Number of slots can change at runtime due via user gui */
   if((!status && (num_slots > 0)) || (status && (num_slots != status->max_points))) {
     TimeseriesRingStatus *new_status = NULL;

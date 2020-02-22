@@ -80,6 +80,7 @@ int ntop_main(int argc, char *argv[])
 int main(int argc, char *argv[])
 #endif
 {
+	printf("start main()\n");
   Prefs *prefs = NULL;
   char *ifName;
   int rc;
@@ -110,6 +111,7 @@ int main(int argc, char *argv[])
   if((ntop = new(std::nothrow)  Ntop(argv[0])) == NULL) _exit(0);
   if((prefs = new(std::nothrow) Prefs(ntop)) == NULL)   _exit(0);
 
+  printf("load config\n");
 #ifndef WIN32
   if((argc >= 2) && (argv[1][0] != '-')) {
     rc = prefs->loadFromFile(argv[1]);
@@ -121,6 +123,7 @@ int main(int argc, char *argv[])
 
   if(rc < 0) return(-1);
 
+  printf("register Prefs\n");
   ntop->registerPrefs(prefs, false);
 
   if((boot_activity = new ThreadedActivity(BOOT_SCRIPT_PATH))) {
@@ -130,6 +133,7 @@ int main(int argc, char *argv[])
     delete boot_activity;
   }
   
+  ntop->getTrace()->traceEvent(TRACE_INFO, "register the network interfaces");//add by rwp 20200218
   prefs->registerNetworkInterfaces();
 
   if(prefs->get_num_user_specified_interfaces() == 0) {
@@ -141,6 +145,14 @@ int main(int argc, char *argv[])
   ntop->registerNagios();
 #endif
 
+  ntop->getTrace()->traceEvent(TRACE_INFO, "register the mqtt client");//add by rwp 20200218
+  if (0 != ntop->registerMqttCli())
+  {
+	  ntop->getTrace()->traceEvent(TRACE_ERROR, "Startup mqttcli failed");
+	  exit(0);
+  }
+	  
+  printf("reload Prefs from Redis\n");
   prefs->reloadPrefsFromRedis();
   prefs->validate();
   
@@ -162,7 +174,7 @@ int main(int argc, char *argv[])
        || !strncmp(ifName, "view:", 5) /* Defer view interfaces init */)
       continue;
 
-    try {
+    try {j
       /* [ zmq-collector.lua@tcp://127.0.0.1:5556 ] */
 #ifndef HAVE_NEDGE
       if(!strcmp(ifName, "dummy")) {
@@ -206,7 +218,7 @@ int main(int argc, char *argv[])
 #ifdef HAVE_PF_RING
 	if((iface == NULL) && (!strstr(ifName, ".pcap"))) {
 	  errno = 0;
-	  iface = new PF_RINGInterface(ifName);
+	  iface = new PF_RINGInterface(ifName);//对侧是如何发送的?--comment by rwp20200216
 	}
 #endif
       }

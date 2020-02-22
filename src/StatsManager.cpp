@@ -25,7 +25,7 @@
 StatsManager::StatsManager(int interface_id, const char *filename) : StoreManager(interface_id) {
   char filePath[MAX_PATH], fileFullPath[MAX_PATH], fileName[MAX_PATH];
 
-  MINUTE_CACHE_NAME = "MINUTE_STATS";
+  MINUTE_CACHE_NAME = "MINUTE_STATS";//
   HOUR_CACHE_NAME = "HOUR_STATS";
   DAY_CACHE_NAME = "DAY_STATS";
 

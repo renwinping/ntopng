@@ -158,6 +158,7 @@ void ThreadedActivity::run() {
   if (exclude_pcap_dump_interfaces && pcap_dump_only)
     return;
 
+  ntop->getTrace()->traceEvent(TRACE_WARNING, "create thread in ThreadedActivity::run(),script:%s", this->activityPath());
   if(pthread_create(&pthreadLoop, NULL, startActivity, (void*)this) == 0) {
     thread_started = true;
 #ifdef HAVE_LIBCAP
@@ -201,6 +202,7 @@ void ThreadedActivity::runScript() {
   snprintf(script_path, sizeof(script_path), "%s/system/%s",
 	   ntop->get_callbacks_dir(), path);
 
+  ntop->getTrace()->traceEvent(TRACE_WARNING, "#######runing script %s", script_path);
   if(stat(script_path, &buf) == 0) {
     runScript(script_path, NULL, 0 /* No deadline */);
   } else
@@ -211,6 +213,9 @@ void ThreadedActivity::runScript() {
 
 /* Run a script - both periodic and one-shot scripts are called here */
 void ThreadedActivity::runScript(char *script_path, NetworkInterface *iface, time_t deadline) {
+#ifdef THREADED_DEBUG
+	ntop->getTrace()->traceEvent(TRACE_WARNING, "enter ThreadedActivity::runScript() [Ptr:%p,path:%s", this, path);
+#endif
   LuaEngine *l;
   u_long max_duration_ms = periodicity * 1e3;
   u_long msec_diff;
@@ -224,7 +229,7 @@ void ThreadedActivity::runScript(char *script_path, NetworkInterface *iface, tim
   ntop->getTrace()->traceEvent(TRACE_WARNING, "[%p] Running %s", this, path);
 #endif
 
-  ntop->getTrace()->traceEvent(TRACE_INFO, "Running %s (iface=%p)", script_path, iface);
+  ntop->getTrace()->traceEvent(TRACE_INFO, "Running %s (iface=%p) in ThreadedActivity::runScript()", script_path, iface);
 
   l = loadVm(script_path, iface, time(NULL));
   if(l == NULL)
@@ -367,7 +372,7 @@ void ThreadedActivity::periodicActivityBody() {
     if(now >= next_run) {
       next_run = Utils::roundTime(now, periodicity,
 				  align_to_localtime ? ntop->get_time_offset() : 0);
-
+	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "schedulePeriodicActivity's job(script:%s) append to enqueue",this->activityPath());
       schedulePeriodicActivity(pool, next_run /* next_run is now also the deadline of the current script */);
     }
 

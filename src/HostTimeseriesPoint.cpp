@@ -78,3 +78,11 @@ void HostTimeseriesPoint::lua(lua_State* vm, NetworkInterface *iface) {
     lua_push_uint64_table_entry(vm, "icmp.echo_reply_pkts_rcvd", icmp->echo_reply_packets_rcvd);
   }
 }
+
+string HostTimeseriesPoint::json()
+{
+	char tempChar[256] = "";
+	snprintf(tempChar, 255, "%u", active_flows_as_client);
+	return tempChar;
+
+}

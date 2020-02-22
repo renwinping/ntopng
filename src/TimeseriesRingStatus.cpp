@@ -45,6 +45,7 @@ TimeseriesRingStatus::~TimeseriesRingStatus() {
 /* *************************************** */
 
 void TimeseriesRingStatus::insert(TimeseriesPoint *pt, time_t when) {
+  ntop->getTrace()->traceEvent(TRACE_WARNING, "insert timeseries(this:%p,max_points:%u, available_points:%u, point_idx:%u, num_steps:%u, cur_steps:%u)",this, max_points, available_points, point_idx, num_steps, cur_steps);//add by rwp 20200218
   if(ts_points[point_idx])
     delete ts_points[point_idx];
 
@@ -52,7 +53,7 @@ void TimeseriesRingStatus::insert(TimeseriesPoint *pt, time_t when) {
   ts_points[point_idx] = pt;
 
   point_idx = (point_idx + 1) % max_points;
-  cur_steps = 0;
+  cur_steps = 0;//每次插入完置0，这样可以根据num_steps来跳着插入---comment by rwp 20200221
 
   /* -1 because 1 point is for buffering */
   available_points = min(available_points + 1, max_points - 1);
@@ -68,6 +69,9 @@ void TimeseriesRingStatus::lua(lua_State* vm, NetworkInterface *iface) {
 
   lua_newtable(vm);
 
+  //调试写“时间序列”值---add by rwp 20200220
+  //ntop->getTrace()->traceEvent(TRACE_INFO, "luable the timeseries in TimeseriesRingStatus::lua(),available_points:%u", available_points);//add by rwp 20200218
+  printf("luable the timeseries in TimeseriesRingStatus::lua(),available_points:%u\n", available_points);//add by rwp 20200218
   for(int i=0; i < available_points; i++) {
     TimeseriesPoint *pt = ts_points[idx];
 
@@ -77,7 +81,7 @@ void TimeseriesRingStatus::lua(lua_State* vm, NetworkInterface *iface) {
       /* Process Point */
       lua_push_uint64_table_entry(vm, "instant", pt->timestamp);
       pt->lua(vm, iface);
-
+	  ntop->getTrace()->traceEvent(TRACE_WARNING, "TimeseriesPoint[instant:%u,value:%s]",pt->timestamp,pt->json().c_str());//add by rwp 20200218
       lua_rawseti(vm, -2, i + 1);
     }
 

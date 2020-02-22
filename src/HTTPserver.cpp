@@ -800,7 +800,12 @@ static int handle_lua_request(struct mg_connection *conn) {
   }
 #endif
 
-#ifdef DEBUG
+#ifndef RWP_DEBUG
+#define RWP_DEBUG
+#endif // 
+
+
+#ifdef RWP_DEBUG
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "[Host: %s][URI: %s][%s][Referer: %s]",
 			       mg_get_header(conn, "Host") ? mg_get_header(conn, "Host") : (char*)"",
 			       request_info->uri,
@@ -815,7 +820,7 @@ static int handle_lua_request(struct mg_connection *conn) {
     return(send_error(conn, 403 /* Forbidden */, request_info->uri,
 		      "Unable to serve requests at this time, possibly starting up or shutting down."));
 
-#ifdef DEBUG
+#ifdef RWP_DEBUG
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "################# [HTTP] %s [%s]",
 			       request_info->uri, referer);
 #endif
@@ -1000,6 +1005,11 @@ static int handle_lua_request(struct mg_connection *conn) {
       }
 
       bool attack_attempt;
+
+	  char ip_buf[32];
+	  ntop->getTrace()->traceEvent(TRACE_WARNING, "######[HTTP] accepted from %s on %s, so do path(name:%s)",
+		  Utils::intoaV4((unsigned int)conn->request_info.remote_ip, ip_buf, sizeof(ip_buf)),
+		  request_info->uri,path);
 
       // NOTE: username is stored into the engine context, so we must guarantee
       // that LuaEngine is destroyed after username goes out of context! Indeeed we delete LuaEngine below.

@@ -609,6 +609,8 @@ NetworkInterface::~NetworkInterface() {
 int NetworkInterface::dumpFlow(time_t when, Flow *f) {
   int rc = -1;
 
+
+
 #ifndef HAVE_NEDGE
   char *json;
   bool es_flow = ntop->getPrefs()->do_dump_flows_on_es() ||
@@ -620,6 +622,8 @@ int NetworkInterface::dumpFlow(time_t when, Flow *f) {
   json = f->serialize(es_flow);
 
   if(json) {
+	  ntop->getTrace()->traceEvent(TRACE_NORMAL,
+		  "dumpFlow to database [t:%u,json:%s]", when, json);//add by rwp 20200220
     rc = db->dumpFlow(when, f, json);
     free(json);
   } else
@@ -880,6 +884,15 @@ Flow* NetworkInterface::getFlow(Mac *srcMac, Mac *dstMac,
       has_too_many_flows = true;
       return(NULL);
     }
+
+	//打印日志，调试时查看---add by rwp 20200220
+	char ip_src[32] = "";
+	char ip_dst[32] = "";
+	ntop->getTrace()->traceEvent(TRACE_NORMAL,
+		"********add new flow in getFlow [vlan:%u,src_ip:%s, src_port:%u,dst_ip:%s, dst_port:%u,flowKey:%u]",vlan_id, 
+		src_ip->print(ip_src, sizeof(ip_src)), src_port, 
+		dst_ip->print(ip_dst, sizeof(ip_dst)), dst_port,
+		ret->key());
 
     if(flows_hash->add(ret, false /* Don't lock, we're inline with the purgeIdle */)) {
       *src2dst_direction = true;
@@ -1317,7 +1330,8 @@ bool NetworkInterface::processPacket(u_int32_t bridge_iface_idx,
   if(this->ethStats.getNumPackets() > MAX_NUM_PACKETS) {
     static bool showMsg = false;
 
-    if(!showMsg) {
+	if (!showMsg) {
+		processPacket
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "-----------------------------------------------------------");
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "WARNING: this demo application is a limited ntopng version able to");
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "capture up to %d packets. If you are interested", MAX_NUM_PACKETS);
@@ -2572,7 +2586,7 @@ u_int32_t NetworkInterface::getFlowMaxIdle() {
 /* **************************************************** */
 
 void NetworkInterface::periodicStatsUpdate() {
-#if 0
+#if 1
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "[%s][%s]", __FUNCTION__, get_name());
 #endif
 
@@ -2650,6 +2664,8 @@ void NetworkInterface::periodicStatsUpdate() {
   }
 
 #ifdef PERIODIC_STATS_UPDATE_DEBUG_TIMING
+  struct timeval tdebug;
+  struct timeval tdebug_init;
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "MySQL dump took %d seconds", time(NULL) - tdebug.tv_sec);
   gettimeofday(&tdebug, NULL);
 #endif
@@ -2666,6 +2682,9 @@ void NetworkInterface::periodicStatsUpdate() {
     ts_ring = new TimeseriesRing(this);
 
   if(ts_ring && ts_ring->isTimeToInsert()) {
+#ifdef PERIODIC_STATS_UPDATE_DEBUG_TIMING
+	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "@@@@@@@@networkinterface 's Timeseries insert a point(time:%u)", tv.tv_sec);
+#endif
     NetworkInterfaceTsPoint *pt = new NetworkInterfaceTsPoint();
     makeTsPoint(pt);
 
@@ -2713,7 +2732,7 @@ bool NetworkInterface::generic_periodic_hash_entry_state_update(GenericHashEntry
 /* For viewed interfaces, this method is executed by the ViewInterface for each
    of its underlying viewed interfaces. */
 void NetworkInterface::periodicHTStateUpdate(time_t deadline, lua_State* vm, bool skip_user_scripts) {
-#if 0
+#if 1
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Updating hash tables [%s]", get_name());
 #endif
   struct timeval tv;
@@ -5061,12 +5080,15 @@ void NetworkInterface::guessAllBroadcastDomainHosts() {
 /* **************************************************** */
 
 void NetworkInterface::getnDPIProtocols(lua_State *vm, ndpi_protocol_category_t filter, bool skip_critical) {
+
+  //ntop->getTrace()->traceEvent(TRACE_NORMAL, "#######enter getnDPIProtocols()!!");
   int i;
   u_int num_supported_protocols = ndpi_get_ndpi_num_supported_protocols(get_ndpi_struct());
   ndpi_proto_defaults_t* proto_defaults = ndpi_get_proto_defaults(get_ndpi_struct());
 
   lua_newtable(vm);
 
+  //ntop->getTrace()->traceEvent(TRACE_NORMAL, "#######enter getnDPIProtocols() num_supported_protocols:%d!!", num_supported_protocols);
   for(i=0; i<(int)num_supported_protocols; i++) {
     char buf[8];
 
@@ -7021,6 +7043,11 @@ void NetworkInterface::makeTsPoint(NetworkInterfaceTsPoint *pt) {
   pt->flows = getNumFlows();
   pt->http_hosts = getNumHTTPHosts();
   pt->l4Stats = l4Stats;
+
+#ifdef PERIODIC_STATS_UPDATE_DEBUG_TIMING
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "makeTsPoint(detail:pt->engaged_alerts = %d \n   pt->hosts          = %d \n   pt->local_hosts    = %d \n   pt->devices        = %d \n   pt->flows          = %d \n   pt->http_hosts     = %d \n  pt->l4Stats=%s )",
+	  pt->engaged_alerts, pt->hosts, pt->local_hosts, pt->devices, pt->flows, pt->http_hosts ,pt->l4Stats.stringableStats().c_str());
+#endif
 }
 
 /* *************************************** */

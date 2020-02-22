@@ -78,6 +78,7 @@ void AddressResolution::resolveHostName(char *_numeric_ip, char *symbolic, u_int
   if((symbolic != NULL) && (symbolic_len > 0)) symbolic[0] = '\0';
   if(numeric_ip[0] == '\0') return;
 
+  //从redis读取ip地址名称，成功用redis否则用本地arpge 
   if(ntop->getRedis()->getAddress(numeric_ip, rsp, sizeof(rsp), false) < 0) {
     char hostname[NI_MAXHOST];
     struct sockaddr *sa;
@@ -97,7 +98,7 @@ void AddressResolution::resolveHostName(char *_numeric_ip, char *symbolic, u_int
       h = gethostbyname((const char*)numeric_ip); /* Non reentrant call */
 
       if(symbolic && h) snprintf(symbolic, symbolic_len, "%s",  h->h_name);
-      ntop->getRedis()->setResolvedAddress(numeric_ip, h ? h->h_name : (char*)"");
+      ntop->getRedis()->setResolvedAddress(numeric_ip, h ? h->h_name : (char*)"");//更新到redis缓存---comment by rwp 20200214
       num_resolved_addresses++;
       m.unlock(__FILE__, __LINE__);
       return;

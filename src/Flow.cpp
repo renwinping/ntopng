@@ -912,9 +912,12 @@ bool Flow::dumpFlow(const struct timeval *tv, NetworkInterface *dumper) {
       dumper->aggregatePartialFlow(tv, this);
 #endif
 
+	//调用接口来实现“导出流”如mysql导出---comment by rwp 202002020
     dumper->dumpFlow(last_seen, this);
 
 #ifndef HAVE_NEDGE
+
+	//若存在“总”导出接口，则各个接口数据都导出到一处，如zmq总线--comment by rwp 20200220
     if(ntop->get_export_interface()) {
       char *json = serialize(false);
 
@@ -1878,6 +1881,8 @@ bool Flow::is_hash_entry_state_idle_transition_ready() const {
 /* *************************************** */
 
 void Flow::periodic_hash_entry_state_update(void *user_data) {
+
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "enter Flow::periodic_hash_entry_state_update()");//增加调试代码用于监视执行“流导出”操作，add by rwp 2010
   periodic_ht_state_update_user_data_t *periodic_ht_state_update_user_data = (periodic_ht_state_update_user_data_t*)user_data;
   struct timeval *tv = periodic_ht_state_update_user_data->tv;
 
@@ -1949,7 +1954,7 @@ char* Flow::serialize(bool es_json) {
       rsp = NULL;
   } else {
     /* JSON string */
-    ntop->getPrefs()->set_json_symbolic_labels_format(false);
+    ntop->getPrefs()->set_json_symbolic_labels_format(/*false*/true);//按填写标签名方便查看，modify by rwp20200220 
     my_object = flow2json();
     rsp = strdup(json_object_to_json_string(my_object));
     ntop->getTrace()->traceEvent(TRACE_DEBUG, "Emitting Flow: %s", rsp);
