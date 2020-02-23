@@ -42,19 +42,33 @@ void NetworkInterfaceTsPoint::lua(lua_State* vm, NetworkInterface *iface) {
   lua_settable(vm, -3);
 }
 
-string NetworkInterfaceTsPoint::json()
+string NetworkInterfaceTsPoint::json(NetworkInterface *iface)
 {
 	string sJson = "";
-	char* _json = serialize();
-	if (_json)
-	{
-		sJson = _json;
-		free(_json);
+// 	char* _json = serialize();
+// 	if (_json)
+// 	{
+// 		sJson = _json;
+// 		free(_json);
+// 	}
+// 	return sJson;
+	json_object *my_object;
+	char *rsp;
+
+	if ((my_object = toJsonObject(iface)) != NULL) {
+
+		/* JSON string */
+		rsp = strdup(json_object_to_json_string(my_object));
+
+		/* Free memory */
+		json_object_put(my_object);
 	}
-	return sJson;
+	else
+		rsp = NULL;
+	return(rsp);
 }
 
-json_object* NetworkInterfaceTsPoint::toJsonObject()
+json_object* NetworkInterfaceTsPoint::toJsonObject(NetworkInterface *iface)
 {
 	json_object *my_object;
 	char buf[64], jsonbuf[64], *c;
@@ -63,11 +77,18 @@ json_object* NetworkInterfaceTsPoint::toJsonObject()
 
 	//时间JSON
 	//snprintf(buf, sizeof(buf), "%u", this->timestamp);
-	json_object_object_add(my_object, "ntop_timestamp", json_object_new_int64(timestamp));
+	json_object_object_add(my_object, "timestamp", json_object_new_int64(timestamp));
+	json_object_object_add(my_object, "packets", json_object_new_int64(ethStats.getNumPackets()));
+	json_object_object_add(my_object, "bytes", json_object_new_int64(ethStats.getNumBytes()));
+	json_object_object_add(my_object, "throughput_bps", json_object_new_int64(bytes_thpt.getThpt()));
+	json_object_object_add(my_object, "throughput_pps", json_object_new_int64(pkts_thpt.getThpt()));
+
 	json_object_object_add(my_object, "hosts", json_object_new_int64(hosts));
 	json_object_object_add(my_object, "local_hosts", json_object_new_int64(local_hosts));
 	json_object_object_add(my_object, "devices", json_object_new_int64(devices));
 	json_object_object_add(my_object, "flows", json_object_new_int64(flows));
+
+
 
 	//添加ndpi统计JSON
 // 	json_object*  ndpi_json = ndpi.getJSONObject(if);
@@ -96,6 +117,10 @@ json_object* NetworkInterfaceTsPoint::toJsonObject()
 		json_object_object_add(my_object, "l4Stats", l4Stats_json);
 	}
 
+	json_object* ndpi_json = ndpi.getJSONObject(iface);
+	if (ndpi_json) {
+		json_object_object_add(my_object, "ndpi", ndpi_json);
+	}
 	return my_object;
 }
 
@@ -103,7 +128,7 @@ char* NetworkInterfaceTsPoint::serialize() {
 	json_object *my_object;
 	char *rsp;
 
-	if ((my_object = toJsonObject()) != NULL) {
+	if ((my_object = toJsonObject(NULL)) != NULL) {
 
 		/* JSON string */
 		rsp = strdup(json_object_to_json_string(my_object));

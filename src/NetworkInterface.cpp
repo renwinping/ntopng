@@ -2704,7 +2704,7 @@ void NetworkInterface::periodicStatsUpdate() {
 	mqtt.qos = 0;
 	mqtt.retain = false;
 	mqtt.topic = "/root/ifstats_json";
-	string _pl = pt->json();
+	string _pl = pt->json(this);
 	mqtt.payload.insert(mqtt.payload.end(), _pl.begin(), _pl.end());
 	
 	ntop->SendMq(&mqtt);
@@ -7062,6 +7062,9 @@ void NetworkInterface::makeTsPoint(NetworkInterfaceTsPoint *pt) {
   pt->flows = getNumFlows();
   pt->http_hosts = getNumHTTPHosts();
   pt->l4Stats = l4Stats;
+  pt->ethStats = ethStats;//add by rwp 20200223
+  pt->bytes_thpt = bytes_thpt;
+  pt->pkts_thpt = pkts_thpt;
 
 #ifdef PERIODIC_STATS_UPDATE_DEBUG_TIMING
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "makeTsPoint(detail:pt->engaged_alerts = %d \n   pt->hosts          = %d \n   pt->local_hosts    = %d \n   pt->devices        = %d \n   pt->flows          = %d \n   pt->http_hosts     = %d \n  pt->l4Stats=%s )",
