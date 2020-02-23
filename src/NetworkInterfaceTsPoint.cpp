@@ -68,6 +68,12 @@ string NetworkInterfaceTsPoint::json(NetworkInterface *iface)
 	return(rsp);
 }
 
+
+std::string NetworkInterfaceTsPoint::json()
+{
+	return "";
+}
+
 json_object* NetworkInterfaceTsPoint::toJsonObject(NetworkInterface *iface)
 {
 	json_object *my_object;
