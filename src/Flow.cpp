@@ -1882,7 +1882,7 @@ bool Flow::is_hash_entry_state_idle_transition_ready() const {
 
 void Flow::periodic_hash_entry_state_update(void *user_data) {
 
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "enter Flow::periodic_hash_entry_state_update()");//增加调试代码用于监视执行“流导出”操作，add by rwp 2010
+  ntop->getTrace()->traceEvent(TRACE_WARNING, "enter Flow::periodic_hash_entry_state_update()");//增加调试代码用于监视执行“流导出”操作，add by rwp 2010
   periodic_ht_state_update_user_data_t *periodic_ht_state_update_user_data = (periodic_ht_state_update_user_data_t*)user_data;
   struct timeval *tv = periodic_ht_state_update_user_data->tv;
 

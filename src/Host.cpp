@@ -796,6 +796,7 @@ bool Host::is_hash_entry_state_idle_transition_ready() const {
 /* ***************************************** */
 
 void Host::periodic_hash_entry_state_update(void *user_data) {
+  ntop->getTrace()->traceEvent(TRACE_WARNING, "enter Host::periodic_hash_entry_state_update");//增加调试代码用于监视执行“主机状态更新”操作，add by rwp 2010
   char buf[64];
   periodic_ht_state_update_user_data_t *periodic_ht_state_update_user_data = (periodic_ht_state_update_user_data_t*)user_data;
 

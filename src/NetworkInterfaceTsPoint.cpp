@@ -44,7 +44,74 @@ void NetworkInterfaceTsPoint::lua(lua_State* vm, NetworkInterface *iface) {
 
 string NetworkInterfaceTsPoint::json()
 {
-	char tempChar[256] = "";
-	snprintf(tempChar, 255, "%u", hosts);
-	return tempChar;
+	string sJson = "";
+	char* _json = serialize();
+	if (_json)
+	{
+		sJson = _json;
+		free(_json);
+	}
+	return sJson;
+}
+
+json_object* NetworkInterfaceTsPoint::toJsonObject()
+{
+	json_object *my_object;
+	char buf[64], jsonbuf[64], *c;
+	time_t t;
+	if ((my_object = json_object_new_object()) == NULL) return(NULL);
+
+	//时间JSON
+	//snprintf(buf, sizeof(buf), "%u", this->timestamp);
+	json_object_object_add(my_object, "ntop_timestamp", json_object_new_int64(timestamp));
+	json_object_object_add(my_object, "hosts", json_object_new_int64(hosts));
+	json_object_object_add(my_object, "local_hosts", json_object_new_int64(local_hosts));
+	json_object_object_add(my_object, "devices", json_object_new_int64(devices));
+	json_object_object_add(my_object, "flows", json_object_new_int64(flows));
+
+	//添加ndpi统计JSON
+// 	json_object*  ndpi_json = ndpi.getJSONObject(if);
+// 	if (ndpi_json)	{
+// 		json_object_object_add(my_object, "ndpi_stats",ndpi_json);
+// 	}
+	//添加ndpi统计JSON
+	json_object*  local_stats_json = local_stats.getJSONObject();
+	if (local_stats_json) {
+		json_object_object_add(my_object, "local_stats", local_stats_json);
+	}
+
+	json_object*  tcpPacketStats_json = tcpPacketStats.getJSONObject();
+	if (tcpPacketStats_json) {
+		json_object_object_add(my_object, "tcpPacketStats", tcpPacketStats_json);
+	}
+
+	json_object*  packetStats_json = packetStats.getJSONObject();
+	if (packetStats_json) {
+		json_object_object_add(my_object, "packetStats", packetStats_json);
+	}
+
+	json_object*  l4Stats_json = json_object_new_object();
+	l4Stats.serialize(l4Stats_json);
+	if (l4Stats_json) {
+		json_object_object_add(my_object, "l4Stats", l4Stats_json);
+	}
+
+	return my_object;
+}
+
+char* NetworkInterfaceTsPoint::serialize() {
+	json_object *my_object;
+	char *rsp;
+
+	if ((my_object = toJsonObject()) != NULL) {
+
+		/* JSON string */
+		rsp = strdup(json_object_to_json_string(my_object));
+
+		/* Free memory */
+		json_object_put(my_object);
+	}
+	else
+		rsp = NULL;
+	return(rsp);
 }

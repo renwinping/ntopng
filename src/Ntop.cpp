@@ -2634,5 +2634,10 @@ int Ntop::registerMqttCli() {
 
 int Ntop::SendMq(ASDUMESSGE* pMsg)
 {
+	if ((m_pLocalCom)&&(pMsg))
+	{
+		printf("SendMq msg(_top:%s)\n", pMsg->topic.c_str());
+		m_pLocalCom->send(*pMsg);
+	}
 	return 0;
 }

@@ -84,5 +84,47 @@ string HostTimeseriesPoint::json()
 	char tempChar[256] = "";
 	snprintf(tempChar, 255, "%u", active_flows_as_client);
 	return tempChar;
+	json_object* point = toJsonObject();
+	if (point)
+	{
+		/* JSON string */
+		char* rsp = strdup(json_object_to_json_string(point));
 
+		/* Free memory */
+		json_object_put(point);
+
+		free(rsp);
+	}else
+	{
+		return "";
+	}
 }
+
+json_object* HostTimeseriesPoint::toJsonObject(){
+	json_object *my_object;
+	char buf[64], jsonbuf[64], *c;
+	time_t t;
+
+	if ((my_object = json_object_new_object()) == NULL) return(NULL);
+
+	json_object_object_add(my_object, "@timestamp", json_object_new_string(buf));
+
+	return(my_object);
+}
+
+// char* HostTimeseriesPoint::serialize() {
+// 	json_object *my_object;
+// 	char *rsp;
+// 
+// 	if ((my_object = toJsonObject()) != NULL) {
+// 
+// 		/* JSON string */
+// 		rsp = strdup(json_object_to_json_string(my_object));
+// 
+// 		/* Free memory */
+// 		json_object_put(my_object);
+// 	}
+// 	else
+// 		rsp = NULL;
+// 	return(rsp);
+// }

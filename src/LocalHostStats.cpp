@@ -101,6 +101,15 @@ void LocalHostStats::updateStats(struct timeval *tv) {
 
     /* Ownership of the point is passed to the ring */
     ts_ring->insert(pt, tv->tv_sec);
+	ASDUMESSGE mqtt;
+	mqtt.mid = 0;
+	mqtt.qos = 0;
+	mqtt.retain = false;
+	mqtt.topic = "/root/host_stats_json";
+	string _pl = pt->json();
+	mqtt.payload.insert(mqtt.payload.end(), _pl.begin(), _pl.end());
+
+	ntop->SendMq(&mqtt);
   }
 }
 

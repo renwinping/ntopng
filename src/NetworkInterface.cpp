@@ -625,6 +625,14 @@ int NetworkInterface::dumpFlow(time_t when, Flow *f) {
 	  ntop->getTrace()->traceEvent(TRACE_NORMAL,
 		  "dumpFlow to database [t:%u,json:%s]", when, json);//add by rwp 20200220
     rc = db->dumpFlow(when, f, json);
+	ASDUMESSGE mqtt;
+	mqtt.mid = 0;
+	mqtt.qos = 0;
+	mqtt.retain = false;
+	mqtt.topic = "/root/flow_json";
+	string _pl = json;
+	mqtt.payload.insert(mqtt.payload.end(), _pl.begin(), _pl.end());
+	ntop->SendMq(&mqtt);
     free(json);
   } else
     rc = -1;
@@ -2690,6 +2698,16 @@ void NetworkInterface::periodicStatsUpdate() {
 
     /* Ownership of the point is passed to the ring */
     ts_ring->insert(pt, tv.tv_sec);
+
+	ASDUMESSGE mqtt;
+	mqtt.mid = 0;
+	mqtt.qos = 0;
+	mqtt.retain = false;
+	mqtt.topic = "/root/ifstats_json";
+	string _pl = pt->json();
+	mqtt.payload.insert(mqtt.payload.end(), _pl.begin(), _pl.end());
+	
+	ntop->SendMq(&mqtt);
   }
 
 #ifdef PERIODIC_STATS_UPDATE_DEBUG_TIMING
@@ -2715,6 +2733,7 @@ bool NetworkInterface::generic_periodic_hash_entry_state_update(GenericHashEntry
   periodic_ht_state_update_user_data_t *periodic_ht_state_update_user_data = (periodic_ht_state_update_user_data_t*)user_data;
   NetworkInterface *iface = periodic_ht_state_update_user_data->iface;
 
+  //更新哈希表的状态，具体见哈希表条目的“重载”函数,如flow:可能活动状态时要导出流统计,host---comment by rwp 20200222
   node->periodic_hash_entry_state_update(user_data);
 
   /* If this is a viewed interface, it is necessary to also call this method
@@ -2733,7 +2752,7 @@ bool NetworkInterface::generic_periodic_hash_entry_state_update(GenericHashEntry
    of its underlying viewed interfaces. */
 void NetworkInterface::periodicHTStateUpdate(time_t deadline, lua_State* vm, bool skip_user_scripts) {
 #if 1
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Updating hash tables [%s]", get_name());
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "Updating hash tables [this:%p,ifname:%s]",this, get_name());
 #endif
   struct timeval tv;
   periodic_ht_state_update_user_data_t periodic_ht_state_update_user_data;
