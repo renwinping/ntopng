@@ -76,3 +76,48 @@ u_int32_t TimeseriesStats::getTotalAlerts() const {
 
   return(num_alerts);
 }
+
+json_object* TimeseriesStats::getJSONObject(NetworkInterface *iface, bool host_details, bool verbose, bool tsLua) {
+
+	//参考lua接口导出状态
+	json_object *my_object = json_object_new_object();
+
+	if (my_object) {
+// 		json_object*  _sentJson = sent.getJSONObject(); 
+// 		if(_sentJson)  json_object_object_add(my_object, "sent", _sentJson);
+// 		json_object*  _rcvdJson = rcvd.getJSONObject();
+// 		if (_rcvdJson)  json_object_object_add(my_object, "rcvd", _rcvdJson);
+
+		json_object *traffic_object = json_object_new_object();
+		if (traffic_object)
+		{
+			json_object_object_add(traffic_object, "bytes_thpt", json_object_new_double(bytes_thpt.getThpt()));
+			json_object_object_add(traffic_object, "pkts_thpt", json_object_new_double(pkts_thpt.getThpt()));
+			json_object_object_add(traffic_object, "sendBytes", json_object_new_int64(sent.getNumBytes()));
+			json_object_object_add(traffic_object, "sendPackets", json_object_new_int64(sent.getNumPkts()));
+			json_object_object_add(traffic_object, "recvBytes", json_object_new_int64(rcvd.getNumBytes()));
+			json_object_object_add(traffic_object, "recvPackets", json_object_new_int64(rcvd.getNumPkts()));
+			json_object_object_add(traffic_object, "total_num_flows_as_client", json_object_new_int64(total_num_flows_as_client));
+			json_object_object_add(traffic_object, "total_num_flows_as_server", json_object_new_int64(total_num_flows_as_server));
+			json_object_object_add(my_object, "traffic", traffic_object);
+		}
+
+		if (verbose) {
+			if ((ndpiStats)&&(iface))
+			{
+				json_object*  ndpi_json = ndpiStats->getJSONObject(iface);
+				if (ndpi_json)				{
+					json_object_object_add(my_object, "ndpi", ndpi_json);
+				}
+			}
+		}
+		if (host_details) {
+			json_object*  l4stats_json = json_object_new_object();
+			l4stats.serialize(l4stats_json);
+			json_object_object_add(my_object, "l4stats", l4stats_json);
+		}
+
+	}
+
+	return(my_object);
+}

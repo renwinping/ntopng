@@ -79,12 +79,10 @@ void HostTimeseriesPoint::lua(lua_State* vm, NetworkInterface *iface) {
   }
 }
 
-string HostTimeseriesPoint::json()
+string HostTimeseriesPoint::json(NetworkInterface *iface)
 {
-	char tempChar[256] = "";
-	snprintf(tempChar, 255, "%u", active_flows_as_client);
-	return tempChar;
-	json_object* point = toJsonObject();
+	string sJson = "";
+	json_object* point = toJsonObject(iface);
 	if (point)
 	{
 		/* JSON string */
@@ -93,38 +91,71 @@ string HostTimeseriesPoint::json()
 		/* Free memory */
 		json_object_put(point);
 
+		sJson = rsp;
 		free(rsp);
-	}else
-	{
-		return "";
 	}
+	return sJson;
 }
 
-json_object* HostTimeseriesPoint::toJsonObject(){
+
+std::string HostTimeseriesPoint::json()
+{
+	return "";
+}
+
+json_object* HostTimeseriesPoint::toJsonObject(NetworkInterface *iface){
 	json_object *my_object;
 	char buf[64], jsonbuf[64], *c;
 	time_t t;
 
 	if ((my_object = json_object_new_object()) == NULL) return(NULL);
 
-	json_object_object_add(my_object, "@timestamp", json_object_new_string(buf));
+	json_object_object_add(my_object, "timestamp", json_object_new_int64(timestamp));
+	Host* pHost = host_stats->getHost();
+
+	if (pHost)
+	{
+		char buf[64], buf_id[64], *host_id = buf_id;
+		char ip_buf[64], *ipaddr = NULL;
+		json_object_object_add(my_object, "ip", json_object_new_string(pHost->get_ip()->print(ip_buf,sizeof(ip_buf))));
+		json_object_object_add(my_object, "mac", json_object_new_string(pHost->getMac()->print(buf, sizeof(buf))));
+		json_object_object_add(my_object, "vlan", /*vlan_id*/json_object_new_int64(pHost->get_vlan_id()));
+		json_object_object_add(my_object, "ipkey", json_object_new_int64(pHost->get_ip()->key()));
+		json_object_object_add(my_object, "name", json_object_new_string(pHost->get_visual_name(buf, sizeof(buf))));
+	}
+
+
+	if (iface)
+	{
+		json_object* _hostJson = host_stats->getJSONObject(iface, true, false, true);
+		if (_hostJson) {
+			json_object_object_add(my_object, "hostJson", _hostJson);
+		}
+	}
+
+
+	json_object* tcp_packet_stats_sent_json = tcp_packet_stats_sent.getJSONObject();
+	if (tcp_packet_stats_sent_json) {
+		json_object_object_add(my_object, "tcpPacketStats.sent", tcp_packet_stats_sent_json);
+	}
+
+	json_object* tcp_packet_stats_rcvd_json = tcp_packet_stats_rcvd.getJSONObject();
+	if (tcp_packet_stats_rcvd_json) {
+		json_object_object_add(my_object, "tcpPacketStats.rcvd", tcp_packet_stats_rcvd_json);
+	}
+
+	if (dns)
+	{
+		json_object* dns_json = dns->getJSONObject();
+		if (dns_json) {
+			json_object_object_add(my_object, "dns", dns_json);
+		}
+	}
+
+	if (icmp) {
+		//to-do 
+	}
 
 	return(my_object);
 }
 
-// char* HostTimeseriesPoint::serialize() {
-// 	json_object *my_object;
-// 	char *rsp;
-// 
-// 	if ((my_object = toJsonObject()) != NULL) {
-// 
-// 		/* JSON string */
-// 		rsp = strdup(json_object_to_json_string(my_object));
-// 
-// 		/* Free memory */
-// 		json_object_put(my_object);
-// 	}
-// 	else
-// 		rsp = NULL;
-// 	return(rsp);
-// }

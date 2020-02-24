@@ -630,7 +630,13 @@ int NetworkInterface::dumpFlow(time_t when, Flow *f) {
 	mqtt.qos = 0;
 	mqtt.retain = false;
 	mqtt.topic = "/root/flow_json";
-	string _pl = json;
+
+	//转换为带时标的JSON以便平台入库
+	char timeStr[100];
+	snprintf(timeStr, sizeof(timeStr),"{ \"timestamp\": %lu,", when);
+	string _pl = timeStr;
+	char* cutHeadPtr = (json + 1);
+	_pl += cutHeadPtr;
 	mqtt.payload.insert(mqtt.payload.end(), _pl.begin(), _pl.end());
 	ntop->SendMq(&mqtt);
     free(json);

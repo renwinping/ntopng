@@ -45,13 +45,6 @@ void NetworkInterfaceTsPoint::lua(lua_State* vm, NetworkInterface *iface) {
 string NetworkInterfaceTsPoint::json(NetworkInterface *iface)
 {
 	string sJson = "";
-// 	char* _json = serialize();
-// 	if (_json)
-// 	{
-// 		sJson = _json;
-// 		free(_json);
-// 	}
-// 	return sJson;
 	json_object *my_object;
 	char *rsp;
 
@@ -62,10 +55,13 @@ string NetworkInterfaceTsPoint::json(NetworkInterface *iface)
 
 		/* Free memory */
 		json_object_put(my_object);
+
+		if (rsp)		{
+			sJson = rsp;
+			free(rsp);
+		}
 	}
-	else
-		rsp = NULL;
-	return(rsp);
+	return sJson;
 }
 
 
@@ -86,8 +82,8 @@ json_object* NetworkInterfaceTsPoint::toJsonObject(NetworkInterface *iface)
 	json_object_object_add(my_object, "timestamp", json_object_new_int64(timestamp));
 	json_object_object_add(my_object, "packets", json_object_new_int64(ethStats.getNumPackets()));
 	json_object_object_add(my_object, "bytes", json_object_new_int64(ethStats.getNumBytes()));
-	json_object_object_add(my_object, "throughput_bps", json_object_new_int64(bytes_thpt.getThpt()));
-	json_object_object_add(my_object, "throughput_pps", json_object_new_int64(pkts_thpt.getThpt()));
+	json_object_object_add(my_object, "throughput_bps", json_object_new_double(bytes_thpt.getThpt()));
+	json_object_object_add(my_object, "throughput_pps", json_object_new_double(pkts_thpt.getThpt()));
 
 	json_object_object_add(my_object, "hosts", json_object_new_int64(hosts));
 	json_object_object_add(my_object, "local_hosts", json_object_new_int64(local_hosts));
@@ -123,10 +119,14 @@ json_object* NetworkInterfaceTsPoint::toJsonObject(NetworkInterface *iface)
 		json_object_object_add(my_object, "l4Stats", l4Stats_json);
 	}
 
-	json_object* ndpi_json = ndpi.getJSONObject(iface);
-	if (ndpi_json) {
-		json_object_object_add(my_object, "ndpi", ndpi_json);
+	if (iface)
+	{
+		json_object* ndpi_json = ndpi.getJSONObject(iface);
+		if (ndpi_json) {
+			json_object_object_add(my_object, "ndpi", ndpi_json);
+		}
 	}
+
 	return my_object;
 }
 
