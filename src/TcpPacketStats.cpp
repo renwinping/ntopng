@@ -59,10 +59,11 @@ json_object* TcpPacketStats::getJSONObject() {
 
   my_object = json_object_new_object();
 
-  if(pktRetr)      json_object_object_add(my_object, "retransmissions", json_object_new_int64(pktRetr));
-  if(pktOOO)       json_object_object_add(my_object, "out_of_order", json_object_new_int64(pktOOO));
-  if(pktLost)      json_object_object_add(my_object, "lost", json_object_new_int64(pktLost));
-  if(pktKeepAlive) json_object_object_add(my_object, "keep_alive", json_object_new_int64(pktKeepAlive));
+  //0“≤ÃÓ–¥£¨±‹√‚ø’JSON---modify by rwp20200225
+  /*if(pktRetr)    */json_object_object_add(my_object, "retransmissions", json_object_new_int64(pktRetr));
+  /*if(pktOOO)     */json_object_object_add(my_object, "out_of_order", json_object_new_int64(pktOOO));
+  /*if(pktLost)    */json_object_object_add(my_object, "lost", json_object_new_int64(pktLost));
+  /*if(pktKeepAlive)*/ json_object_object_add(my_object, "keep_alive", json_object_new_int64(pktKeepAlive));
   
   return(my_object);
 }
