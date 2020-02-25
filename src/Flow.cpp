@@ -1363,10 +1363,10 @@ void Flow::periodic_stats_update(void *user_data, bool quick) {
       float goodput_bytes_msec         = goodput_bytes_msec_cli2srv + goodput_bytes_msec_srv2cli;
 
       if(isDetectionCompleted() && cli_host && srv_host) {
-	iface->topProtocolsAdd(cli_host->get_host_pool(), stats_protocol, diff_bytes);
+	iface->topProtocolsAdd(cli_host->get_host_pool(), stats_protocol, diff_bytes);//增加接口“协议”，可用于计算topN--comment by rwp20200225
 
 	if(cli_host->get_host_pool() != srv_host->get_host_pool())
-	  iface->topProtocolsAdd(srv_host->get_host_pool(), stats_protocol, diff_bytes);
+	  iface->topProtocolsAdd(srv_host->get_host_pool(), stats_protocol, diff_bytes);////增加接口“MAC”，可用于计算topN--comment by rwp20200225
 
 	if(cli_mac)
 	  iface->topMacsAdd(cli_mac, stats_protocol, diff_bytes);

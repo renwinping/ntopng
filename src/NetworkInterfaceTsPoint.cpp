@@ -105,7 +105,7 @@ json_object* NetworkInterfaceTsPoint::toJsonObject(NetworkInterface *iface)
 
 	json_object*  tcpPacketStats_json = tcpPacketStats.getJSONObject();
 	if (tcpPacketStats_json) {
-		json_object_object_add(my_object, "tcpPacketStats", tcpPacketStats_json);
+		json_object_object_add(my_object, "tcpPacketBadStats", tcpPacketStats_json);
 	}
 
 	json_object*  packetStats_json = packetStats.getJSONObject();

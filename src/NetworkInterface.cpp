@@ -616,15 +616,16 @@ int NetworkInterface::dumpFlow(time_t when, Flow *f) {
   bool es_flow = ntop->getPrefs()->do_dump_flows_on_es() ||
     ntop->getPrefs()->do_dump_flows_on_ls();
 
-  if(!db)
-    return(-1);
-
   json = f->serialize(es_flow);
 
   if(json) {
-	  ntop->getTrace()->traceEvent(TRACE_NORMAL,
-		  "dumpFlow to database [t:%u,json:%s]", when, json);//add by rwp 20200220
-    rc = db->dumpFlow(when, f, json);
+	  if (db)
+	  {
+		  ntop->getTrace()->traceEvent(TRACE_NORMAL,
+			  "dumpFlow to database [t:%u,json:%s]", when, json);//add by rwp 20200220
+		  rc = db->dumpFlow(when, f, json);
+	  }
+
 	ASDUMESSGE mqtt;
 	mqtt.mid = 0;
 	mqtt.qos = 0;
@@ -2660,7 +2661,7 @@ void NetworkInterface::periodicStatsUpdate() {
   ethStats.updateStats(&tv);
   ndpiStats->updateStats(&tv);
 
-  topItemsCommit(&tv);
+  topItemsCommit(&tv);//删除topN的数据，并重新计数
 
 #ifdef NTOPNG_PRO
   if(is_aggregated_flows_dump_ready()) 
