@@ -369,7 +369,25 @@ int StatsManager::insertMinuteSampling(time_t epoch, const char * const sampling
   if(!sampling)
     return -1;
 
-  return insertSampling(sampling, MINUTE_CACHE_NAME, static_cast<long int>(epoch));
+  int rc = insertSampling(sampling, MINUTE_CACHE_NAME, static_cast<long int>(epoch));
+  //return insertSampling(sampling, MINUTE_CACHE_NAME, static_cast<long int>(epoch));
+  ASDUMESSGE mqtt;
+  mqtt.mid = 0;
+  mqtt.qos = 0;
+  mqtt.retain = false;
+  mqtt.topic = "/root/toptalker_json";
+
+  //把lua生成的topTalker转换为带时标的JSON以便平台入库
+  char timeStr[100];
+  snprintf(timeStr, sizeof(timeStr), "{ \"timestamp\": %lu,", epoch);
+  string _pl = timeStr;
+  char* cutHeadPtr = ((char*)sampling + 1);
+  _pl += cutHeadPtr;
+  mqtt.payload.insert(mqtt.payload.end(), _pl.begin(), _pl.end());
+
+  ntop->SendMq(&mqtt);
+
+  return rc;
 }
 
 /**
