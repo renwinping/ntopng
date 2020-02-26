@@ -88,17 +88,17 @@ json_object* LocalTrafficStats::getJSONObject() {
   my_object = json_object_new_object();
 
   my_stats = json_object_new_object();
-  if(packets.local2local > 0) json_object_object_add(my_object, "local2local", json_object_new_int64(packets.local2local));
-  if(packets.local2remote > 0) json_object_object_add(my_object, "local2remote", json_object_new_int64(packets.local2remote));
-  if(packets.remote2local > 0) json_object_object_add(my_object, "remote2local", json_object_new_int64(packets.remote2local));
-  if(packets.remote2remote > 0) json_object_object_add(my_object, "remote2remote", json_object_new_int64(packets.remote2remote));
+  if(packets.local2local > 0) json_object_object_add(/*my_object*/my_stats, "local2local", json_object_new_int64(packets.local2local));
+  if(packets.local2remote > 0) json_object_object_add(/*my_object*/my_stats, "local2remote", json_object_new_int64(packets.local2remote));
+  if(packets.remote2local > 0) json_object_object_add(/*my_object*/my_stats, "remote2local", json_object_new_int64(packets.remote2local));
+  if(packets.remote2remote > 0) json_object_object_add(/*my_object*/my_stats, "remote2remote", json_object_new_int64(packets.remote2remote));
   json_object_object_add(my_object, "packets", my_stats);
   
   my_stats = json_object_new_object();
-  if(bytes.local2local > 0) json_object_object_add(my_object, "local2local", json_object_new_int64(bytes.local2local));
-  if(bytes.local2remote > 0) json_object_object_add(my_object, "local2remote", json_object_new_int64(bytes.local2remote));
-  if(bytes.remote2local > 0) json_object_object_add(my_object, "remote2local", json_object_new_int64(bytes.remote2local));
-  if(bytes.remote2remote > 0) json_object_object_add(my_object, "remote2remote", json_object_new_int64(bytes.remote2remote));
+  if(bytes.local2local > 0) json_object_object_add(/*my_object*/my_stats, "local2local", json_object_new_int64(bytes.local2local));
+  if(bytes.local2remote > 0) json_object_object_add(/*my_object*/my_stats, "local2remote", json_object_new_int64(bytes.local2remote));
+  if(bytes.remote2local > 0) json_object_object_add(/*my_object*/my_stats, "remote2local", json_object_new_int64(bytes.remote2local));
+  if(bytes.remote2remote > 0) json_object_object_add(/*my_object*/my_stats, "remote2remote", json_object_new_int64(bytes.remote2remote));
   json_object_object_add(my_object, "bytes", my_stats);
   
   return(my_object);
