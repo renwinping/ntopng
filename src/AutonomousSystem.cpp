@@ -69,7 +69,7 @@ void AutonomousSystem::updateRoundTripTime(u_int32_t rtt_msecs) {
   u_int32_t old_rtt = round_trip_time;
 #endif
   if(round_trip_time)
-    Utils::update_ewma(rtt_msecs, &round_trip_time, ewma_alpha_percent);
+    Utils::update_ewma(rtt_msecs, &round_trip_time, ewma_alpha_percent);//ewma--“指数加权平均”
   else
     round_trip_time = rtt_msecs;
 #ifdef AS_RTT_DEBUG
