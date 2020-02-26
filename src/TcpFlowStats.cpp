@@ -59,10 +59,11 @@ json_object* TcpFlowStats::getJSONObject() {
 
   my_object = json_object_new_object();
 
-  if(numSynFlows > 0) json_object_object_add(my_object, "numSynFlows", json_object_new_int(numSynFlows));
-  if(numEstablishedFlows > 0) json_object_object_add(my_object, "numEstablishedFlows", json_object_new_int(numEstablishedFlows));
-  if(numResetFlows > 0) json_object_object_add(my_object, "numResetFlows", json_object_new_int(numResetFlows));
-  if(numFinFlows > 0) json_object_object_add(my_object, "numFinFlows", json_object_new_int(numFinFlows));
+  //统一都输出即使为0作为占位---modify by rwp 20200226
+  /*if(numSynFlows > 0) */json_object_object_add(my_object, "numSynFlows", json_object_new_int(numSynFlows));
+  /*if(numEstablishedFlows > 0)*/ json_object_object_add(my_object, "numEstablishedFlows", json_object_new_int(numEstablishedFlows));
+  /*if(numResetFlows > 0) */json_object_object_add(my_object, "numResetFlows", json_object_new_int(numResetFlows));
+  /*if(numFinFlows > 0) */json_object_object_add(my_object, "numFinFlows", json_object_new_int(numFinFlows));
   
   return(my_object);
 }
