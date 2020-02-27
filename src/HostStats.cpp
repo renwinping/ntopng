@@ -94,6 +94,26 @@ void HostStats::getJSONObject(json_object *my_object, DetailsLevel details_level
       json_object_object_add(my_object, "tcpPacketStats.sent", tcp_packet_stats_sent.getJSONObject());
     if(tcp_packet_stats_rcvd.seqIssues())
       json_object_object_add(my_object, "tcpPacketStats.recv", tcp_packet_stats_rcvd.getJSONObject());
+
+	//增加两个方向上syn,synack,rst统计---add by rwp 20200226
+	json_object* sent_stats_json = /*sent_stats.getJSONObject()*/json_object_new_object();
+	if (sent_stats_json)	{
+		json_object_object_add(sent_stats_json, "syn", json_object_new_int64(sent_stats.syn));
+		json_object_object_add(sent_stats_json, "synack", json_object_new_int64(sent_stats.synack));
+		json_object_object_add(sent_stats_json, "finack", json_object_new_int64(sent_stats.finack));
+		json_object_object_add(sent_stats_json, "rst", json_object_new_int64(sent_stats.rst));
+		json_object_object_add(my_object, "sent_stats", sent_stats_json);
+	}
+
+	json_object* recv_stats_json = /*recv_stats.getJSONObject()*/json_object_new_object();
+	if (recv_stats_json) {
+		json_object_object_add(recv_stats_json, "syn", json_object_new_int64(recv_stats.syn));
+		json_object_object_add(recv_stats_json, "synack", json_object_new_int64(recv_stats.synack));
+		json_object_object_add(recv_stats_json, "finack", json_object_new_int64(recv_stats.finack));
+		json_object_object_add(recv_stats_json, "rst", json_object_new_int64(recv_stats.rst));
+		json_object_object_add(my_object, "recv_stats", recv_stats_json);
+	}
+
   }
 }
 
