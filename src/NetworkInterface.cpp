@@ -2622,12 +2622,12 @@ void NetworkInterface::periodicStatsUpdate() {
   /* View Interfaces don't have flows, they just walk flows of their 'viewed' peers */
   if((!isView()) && flows_hash) {
     begin_slot = 0;
-    walker(&begin_slot, true, walker_flows, host_flow_update_stats, &periodic_stats_update_user_data);
+    walker(&begin_slot, true, walker_flows, host_flow_update_stats, &periodic_stats_update_user_data);//遍历"流"hashtable更新统计数据---comment by rwp 20200227
   }
 
   if(hosts_hash) {
     begin_slot = 0;
-    walker(&begin_slot, true, walker_hosts, host_flow_update_stats, &periodic_stats_update_user_data);
+    walker(&begin_slot, true, walker_hosts, host_flow_update_stats, &periodic_stats_update_user_data);//遍历"主机"hashtable更新统计数据---comment by rwp 20200227
   }
 
   if(ases_hash) {
