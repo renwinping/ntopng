@@ -76,7 +76,7 @@ void LocalHostStats::incrVisitedWebSite(char *hostname) {
 /* *************************************** */
 
 void LocalHostStats::updateStats(struct timeval *tv) {
-  HostStats::updateStats(tv);
+  HostStats::updateStats(tv);//可能需要重载这个函数在里面发送mqtt数据---comment by rwp 20200226
 
   if(dns)  dns->updateStats(tv);
   if(icmp) icmp->updateStats(tv);
