@@ -127,9 +127,15 @@ json_object* HostTimeseriesPoint::toJsonObject(NetworkInterface *iface){
 
 	if (iface)
 	{
-		json_object* _hostJson = host_stats->getJSONObject(iface, true, false, true);
-		if (_hostJson) {
-			json_object_object_add(my_object, "hostJson", _hostJson);
+		//json_object* _hostJson = host_stats->getJSONObject(iface, true, false, true);
+		json_object* _hostJson = json_object_new_object();
+		HostStats* hostStatsPtr = pHost->getHostStats();
+		if (hostStatsPtr)
+		{
+			hostStatsPtr->getJSONObject(_hostJson, details_high);
+			if (_hostJson) {
+				json_object_object_add(my_object, "host_stats", _hostJson);
+			}
 		}
 	}
 
