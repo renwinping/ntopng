@@ -81,7 +81,7 @@ void TimeseriesRingStatus::lua(lua_State* vm, NetworkInterface *iface) {
       /* Process Point */
       lua_push_uint64_table_entry(vm, "instant", pt->timestamp);
       pt->lua(vm, iface);
-	  ntop->getTrace()->traceEvent(TRACE_WARNING, "TimeseriesPoint[instant:%u,value:%s]",pt->timestamp,pt->json(iface).c_str());//add by rwp 20200218
+	  //ntop->getTrace()->traceEvent(TRACE_WARNING, "TimeseriesPoint[instant:%u,value:%s]",pt->timestamp,pt->json(iface).c_str());//add by rwp 20200218
       lua_rawseti(vm, -2, i + 1);
     }
 
