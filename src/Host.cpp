@@ -796,7 +796,7 @@ bool Host::is_hash_entry_state_idle_transition_ready() const {
 /* ***************************************** */
 
 void Host::periodic_hash_entry_state_update(void *user_data) {
-  ntop->getTrace()->traceEvent(TRACE_WARNING, "enter Host::periodic_hash_entry_state_update");//增加调试代码用于监视执行“主机状态更新”操作，add by rwp 2010
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "enter Host::periodic_hash_entry_state_update");//增加调试代码用于监视执行“主机状态更新”操作，add by rwp 2010
   char buf[64];
   periodic_ht_state_update_user_data_t *periodic_ht_state_update_user_data = (periodic_ht_state_update_user_data_t*)user_data;
 
@@ -831,7 +831,7 @@ void Host::periodic_stats_update(void *user_data, bool quick) {
 
   checkReloadPrefs();
   checkDataReset();
-  checkStatsReset();
+  checkStatsReset();//检查统计数据重置--comment by rwp 20200226
   checkBroadcastDomain();
 
   /* OS detection */
@@ -854,6 +854,67 @@ void Host::periodic_stats_update(void *user_data, bool quick) {
 #endif
 
   GenericHashEntry::periodic_stats_update(user_data, quick);
+
+  /*
+  *	增加发送host的信息在5秒每次更新主机hashtable，太多的话可能会有些问题---add by rwp 20200227
+  */
+//   json_object* _hostJson = json_object_new_object();
+//   if (_hostJson)
+//   {
+// 	  char buf[64], buf_id[64], *host_id = buf_id;
+// 	  char ip_buf[64], *ipaddr = NULL;
+// 	  json_object_object_add(_hostJson, "timestamp", json_object_new_int64(tv->tv_sec));
+// 	  json_object_object_add(_hostJson, "ip", json_object_new_string(get_ip()->print(ip_buf, sizeof(ip_buf))));
+// 	  json_object_object_add(_hostJson, "mac", json_object_new_string(getMac()->print(buf, sizeof(buf))));
+// 	  json_object_object_add(_hostJson, "vlan", /*vlan_id*/json_object_new_int64(get_vlan_id()));
+// 	  json_object_object_add(_hostJson, "ipkey", json_object_new_int64(get_ip()->key()));
+// 	  json_object_object_add(_hostJson, "name", json_object_new_string(get_visual_name(buf, sizeof(buf))));
+// 
+// 	  json_object* _hstats = json_object_new_object();
+// 	  this->getHostStats()->getJSONObject(_hstats, details_high);
+// 	  json_object_object_add(_hostJson, "statis", _hstats);
+// 	  /* JSON string */
+// 	  char* rsp = strdup(json_object_to_json_string(_hostJson));
+// 
+// 	  /* Free memory */
+// 	  json_object_put(_hostJson);
+// 
+// 	  if (rsp) {
+// 		  ASDUMESSGE mqtt;
+// 		  mqtt.mid = 0;
+// 		  mqtt.qos = 0;
+// 		  mqtt.retain = false;
+// 		  mqtt.topic = "/root/host_json";
+//  		  string _pl = rsp;
+// 		  mqtt.payload.insert(mqtt.payload.end(), _pl.begin(), _pl.end());
+// 		  ntop->SendMq(&mqtt);
+// 		  free(rsp);
+// 	  }
+//   }
+  json_object* _hostJson = json_object_new_object();
+  if (_hostJson)
+  {
+	  json_object_object_add(_hostJson, "timestamp", json_object_new_int64(tv->tv_sec));
+	  this->getJSONObject(_hostJson);
+	  /* JSON string */
+	  char* rsp = strdup(json_object_to_json_string(_hostJson));
+	  
+	  /* Free memory */
+	  json_object_put(_hostJson);
+	  
+	  if (rsp) {
+	   ASDUMESSGE mqtt;
+	   mqtt.mid = 0;
+	   mqtt.qos = 0;
+	   mqtt.retain = false;
+	   mqtt.topic = "/root/host_json";
+	    string _pl = rsp;
+	   mqtt.payload.insert(mqtt.payload.end(), _pl.begin(), _pl.end());
+	   ntop->SendMq(&mqtt);
+	   free(rsp);
+	  }
+  }
+  
 }
 
 /* *************************************** */
@@ -1373,4 +1434,57 @@ char* Host::get_tskey(char *buf, size_t bufsize) {
     k = get_hostkey(buf, bufsize);
 
   return(k);
+}
+
+void Host::getJSONObject(json_object *my_object) {
+	if (my_object)
+	{
+		char buf[64];
+		char ip_buf[64];
+		json_object_object_add(my_object, "ip", json_object_new_string(get_ip()->print(ip_buf, sizeof(ip_buf))));
+		json_object_object_add(my_object, "mac", json_object_new_string(getMac()->print(buf, sizeof(buf))));
+		json_object_object_add(my_object, "vlan", /*vlan_id*/json_object_new_int64(get_vlan_id()));
+		json_object_object_add(my_object, "ipkey", json_object_new_int64(get_ip()->key()));
+		json_object_object_add(my_object, "name", json_object_new_string(get_visual_name(buf, sizeof(buf))));
+
+		HostStats* host_stats = this->getHostStats();
+		json_object_object_add(my_object, "bytes_thpt", json_object_new_double(host_stats->getBytesThpt()));
+		json_object_object_add(my_object, "pkts_thpt", json_object_new_double(host_stats->getPacketsThpt()));
+		json_object_object_add(my_object, "sendBytes", json_object_new_int64(host_stats->getNumBytesSent()));
+		json_object_object_add(my_object, "sendPackets", json_object_new_int64(host_stats->getNumPktsSent()));
+		json_object_object_add(my_object, "recvBytes", json_object_new_int64(host_stats->getNumBytesRcvd()));
+		json_object_object_add(my_object, "recvPackets", json_object_new_int64(host_stats->getNumPktsRcvd()));
+		
+		//增加4层统计
+		json_object*  l4stats_json = json_object_new_object();
+		host_stats->getL4Stats()->serialize(l4stats_json);
+		json_object_object_add(my_object, "l4stats", l4stats_json);
+
+		//增中tcp异常统计
+		TcpPacketStats*  tcp_send_stats = host_stats->getTcpPacketSentStats();
+		json_object*  _tcp_send_stats_json = tcp_send_stats->getJSONObject();
+		json_object_object_add(my_object, "send_tcpbad_stats", _tcp_send_stats_json);
+
+		TcpPacketStats*  tcp_recv_stats = host_stats->getTcpPacketRcvdStats();
+		json_object*  _tcp_recv_stats_json = tcp_recv_stats->getJSONObject();
+		json_object_object_add(my_object, "recv_tcpbad_stats", _tcp_recv_stats_json);
+
+		//增加tcp flag统计
+		bool is_send = true;
+		json_object*  sent_stats_json = host_stats->getPacketStats(is_send)->getJSONObject();
+		json_object_object_add(my_object, "sent_tcp_stats", sent_stats_json);
+
+		is_send = false;
+		json_object*  rcvd_stats_json = host_stats->getPacketStats(is_send)->getJSONObject();
+		json_object_object_add(my_object, "rcvd_tcp_stats", rcvd_stats_json);
+
+		//增加主机的ndpi统计
+		nDPIStats* ndpi = host_stats->getnDPIStats();
+		if (ndpi)
+		{
+			NetworkInterface* _if = getInterface();
+			json_object* json_ndpi = ndpi->getJSONObject(_if);
+			json_object_object_add(my_object, "ndpi", json_ndpi);
+		}
+	}
 }
