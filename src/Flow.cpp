@@ -892,7 +892,7 @@ bool Flow::dumpFlow(const struct timeval *tv, NetworkInterface *dumper) {
     if(!idle()) {
       if(dumper->getIfType() == interface_type_PCAP_DUMP
          || tv->tv_sec - get_first_seen() < CONST_DB_DUMP_FREQUENCY
-	 || tv->tv_sec - get_partial_last_seen() < CONST_DB_DUMP_FREQUENCY) {
+	 || tv->tv_sec - get_partial_last_seen() < CONST_DB_DUMP_FREQUENCY) {//正常“active流”是300秒导出一次---comment by rwp 2020331
 	return(rc);
       }
     } else {
@@ -2015,6 +2015,9 @@ json_object* Flow::flow2json() {
 			     json_object_new_string(Utils::formatMac(srv_host ? srv_host->get_mac() : NULL, buf, sizeof(buf))));
   }
 
+  //添加一个"流key"方便比较同一“流”---comment by rwp 20200229
+  json_object_object_add(my_object, "flowKey", json_object_new_int64(key()));
+
   if(cli_ip) {
     if(cli_ip->isIPv4()) {
       json_object_object_add(my_object, Utils::jsonLabel(IPV4_SRC_ADDR, "IPV4_SRC_ADDR", jsonbuf, sizeof(jsonbuf)),
@@ -2255,7 +2258,7 @@ bool Flow::isNetfilterIdleFlow() const {
 /* *************************************** */
 
 void Flow::housekeep(time_t t) {
-  if(((t - get_last_seen()) > 5 /* sec */)     
+  if(((t - get_last_seen()) > 5 /* sec */)     //当还未“检测ndp协议状态”则五秒后应强制处理---comment by rwp 20200301
      && iface->get_ndpi_struct() && get_ndpi_flow()) {
     u_int8_t proto_guessed;
     ndpi_protocol givenup_protocol = ndpi_detection_giveup(iface->get_ndpi_struct(),
