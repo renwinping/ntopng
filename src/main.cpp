@@ -174,10 +174,10 @@ int main(int argc, char *argv[])
        || !strncmp(ifName, "view:", 5) /* Defer view interfaces init */)
       continue;
 
-    try {j
+    try {
       /* [ zmq-collector.lua@tcp://127.0.0.1:5556 ] */
 #ifndef HAVE_NEDGE
-      if(!strcmp(ifName, "dummy")) {
+      if(!strcmp(ifName, "dummy")) {  //dummy接口---comment by rwp 
 	iface = new DummyInterface();
       } else if((strstr(ifName, "tcp://") || strstr(ifName, "ipc://"))) {
 	char *at = strchr(ifName, '@');
@@ -188,9 +188,9 @@ int main(int argc, char *argv[])
 	else
 	  endpoint = ifName;
 
-	iface = new ZMQCollectorInterface(endpoint);
+	iface = new ZMQCollectorInterface(endpoint);//ZMQ接口一般对应n2disk程序经zmq发送流消息处理统计--comment by rwp 
       } else if(strstr(ifName, "syslog://")) {
-	iface = new SyslogCollectorInterface(ifName);
+	iface = new SyslogCollectorInterface(ifName);//syslog接口
 #if defined(HAVE_PF_RING) && (!defined(NTOPNG_EMBEDDED_EDITION)) && (!defined(__i686__)) && (!defined(__ARM_ARCH))
       } else if(strstr(ifName, "zcflow:")) {
 	iface = new ZCCollectorInterface(ifName);
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
 
 #if defined(HAVE_NEDGE)
         if(iface == NULL && strncmp(ifName, "nf:", 3) == 0)
-          iface = new NetfilterInterface(ifName);
+          iface = new NetfilterInterface(ifName);//Netfilter类型接口
 #endif
 
 #ifdef HAVE_PF_RING
@@ -237,6 +237,7 @@ int main(int argc, char *argv[])
     if(iface == NULL) {
       try {
 	errno = 0;
+	printf("####new PcapInterface type networkinterface(%s)!\n",ifName);
 	iface = new PcapInterface(ifName);
       } catch(int err) {
 	ntop->getTrace()->traceEvent(TRACE_ERROR, "An exception occurred during %s interface creation[%d]: %s",
