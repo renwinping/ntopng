@@ -122,6 +122,10 @@ Prefs::Prefs(Ntop *_ntop) {
 
   mysql_host = mysql_dbname = mysql_tablename = mysql_user = mysql_pw = NULL;
   mysql_port = CONST_DEFAULT_MYSQL_PORT;
+
+  mqtt_host = NULL; mqtt_port = NULL; mqtt_id = NULL;
+  imqtt_port = 1883; imqtt_id = 137;
+
   ls_host = NULL;
   ls_port = NULL;
   ls_proto = NULL;
@@ -391,6 +395,7 @@ void usage() {
 #endif
 	 "--ignore-vlans                      | Ignore VLAN tags from traffic\n"
 	 "--simulate-vlans                    | Simulate VLAN traffic (debug only)\n"
+	 "--dump-json                         | export json to mqtt\n"
 	 "[--help|-h]                         | Help\n",
 #ifdef HAVE_NEDGE
 	 "edge "
@@ -739,6 +744,8 @@ static const struct option long_options[] = {
   { "check-license",                     no_argument,       NULL, 253 },
   { "community",                         no_argument,       NULL, 254 },
 #endif
+
+  { "dump-json",                         required_argument, NULL, 'a' },//增加一个mqtt的命令行选项---comment by rwp 20200303
 
   /* End of options */
   { NULL,                                no_argument,       NULL,  0 }
@@ -1412,6 +1419,60 @@ int Prefs::setOption(int optkey, char *optarg) {
     break;
 #endif
 
+	/*
+	 *	增加一个配置选项
+	 */
+  case 'a'://dump-json
+	  if (!optarg)
+	  {
+		  ntop->getTrace()->traceEvent(TRACE_ERROR, "No mqtt parameter specified, -a ignored");
+		  exit(0);
+		  return(-1);
+	  }
+	  else
+		if (!strncmp(optarg, "mqtt", 4)) {
+			      printf("__________optarg__________:%s\n", optarg);
+				  //./ntopng ... --dump-json="mqtt;127.0.0.1;1883;1000"
+				  optarg = Utils::tokenizer(strchr(optarg, ';') + 1, ';', &mqtt_host);
+				  printf("mqtt_host:%s\n", mqtt_host);
+				  optarg = Utils::tokenizer(optarg, ';', &mqtt_port);
+				  printf("mqtt_port:%s\n", mqtt_port);
+				  mqtt_id = strdup(optarg ? optarg : "");
+				  printf("mqtt_id:%s\n", mqtt_id);
+				  if (mqtt_host && mqtt_port) {
+					  errno = 0;
+					  long l = strtol(mqtt_port, NULL, 10);
+
+					  if (errno || !l)
+						  ntop->getTrace()->traceEvent(TRACE_WARNING, "Invalid mqtt port, using default port %d [%s]",
+							  1883,
+							  strerror(errno));
+					  else
+						  imqtt_port = (int)l;
+
+					  errno = 0;
+					  l = strtol(mqtt_id, NULL, 10);
+
+					  if (errno || !l)
+						  ntop->getTrace()->traceEvent(TRACE_WARNING, "Invalid mqtt id, using default id %d [%s]",
+							  137,
+							  strerror(errno));
+					  else
+						  imqtt_id = (int)l;
+				  }
+				  else
+					  ntop->getTrace()->traceEvent(TRACE_WARNING, "Invalid format for -a mqtt;....");
+			  }
+		else
+		{
+			ntop->getTrace()->traceEvent(TRACE_WARNING,
+				"Discarding -a %s: value out of range", optarg);
+			exit(0);
+			return(-1);
+		}
+	  break;
+
+	  /////////////////////////
   default:
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Unknown option -%c: Ignored.", (char)optkey);
     return(-1);
@@ -1477,10 +1538,10 @@ int Prefs::loadFromCLI(int argc, char *argv[]) {
 #else
 	  argc, argv,
 #endif
-			 "k:eg:hi:w:r:sg:m:n:p:qd:t:x:y:1:2:3:4:5:l:uv:A:B:CD:E:F:N:G:I:O:Q:S:TU:X:W:VZ:",
+			 "k:eg:hi:w:r:sg:m:n:p:qd:t:x:y:1:2:3:4:5:l:uv:A:B:CD:E:F:N:G:I:O:Q:S:TU:X:W:VZ:a:",
 			 long_options, NULL)) != '?') {
     if(c == 255) break;
-    setOption(c, optarg);
+    if (0 != setOption(c, optarg)) exit(0);
   }
 
   if((http_port == 0) && (https_port == 0)) {

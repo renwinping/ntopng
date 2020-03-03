@@ -2596,7 +2596,14 @@ void Ntop::setnDPIProtocolCategory(u_int16_t protoId, ndpi_protocol_category_t p
 
 int Ntop::registerMqttCli() {
 #define NTOPNG_ID 103
-	m_pLocalCom = new CIntecomWrapper(NTOPNG_ID);
+	if (getPrefs()->get_mqtt_host()==NULL)
+	{
+		//允许不配置mqtt的转发--comment by rwp 20203003
+		return 0;
+	}
+
+	int mqtt_cliId = getPrefs()->get_mqtt_id();
+	m_pLocalCom = new CIntecomWrapper(mqtt_cliId);
 	if (NULL == m_pLocalCom)
 	{
 		return -1;
@@ -2609,12 +2616,12 @@ int Ntop::registerMqttCli() {
 	}
 
 	KYMSGER_CFG config;
-	config.msgrId = 103;//固定分配的msgId
+	config.msgrId = mqtt_cliId;//固定分配的msgId
 	config.BufLengh = 2048;
-	strcpy(config.localIp, "127.0.0.1");
+	strcpy(config.localIp,"127.0.0.1" );
 	config.localPort = 1000;
-	strcpy(config.remoteIp, "127.0.0.1");
-	config.remoteport = 1883;
+	strcpy(config.remoteIp, getPrefs()->get_mqtt_host());
+	config.remoteport = getPrefs()->get_mqtt_port();
 	config.pTimeOut = 1000;
 	config.netWay = 0;
 	config.role = MSG_ROLE_RECEIR;//仅发送者
