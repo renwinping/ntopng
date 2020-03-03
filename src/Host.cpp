@@ -1474,11 +1474,11 @@ void Host::getJSONObject(json_object *my_object) {
 		//增加tcp flag统计
 		bool is_send = true;
 		json_object*  sent_stats_json = host_stats->getPacketStats(is_send)->getJSONObject();
-		json_object_object_add(my_object, "sent_tcp_stats", sent_stats_json);
+		json_object_object_add(my_object, "sent_packet_stats", sent_stats_json);
 
 		is_send = false;
 		json_object*  rcvd_stats_json = host_stats->getPacketStats(is_send)->getJSONObject();
-		json_object_object_add(my_object, "rcvd_tcp_stats", rcvd_stats_json);
+		json_object_object_add(my_object, "rcvd_packet_stats", rcvd_stats_json);
 
 		//增加主机的ndpi统计
 		nDPIStats* ndpi = host_stats->getnDPIStats();
