@@ -121,7 +121,7 @@ NetworkInterface::NetworkInterface(const char *name,
     ; /* Don't setup MDNS on ZC or RSS interfaces */
   } else {
     ipv4_network = ipv4_network_mask = 0;
-    if(pcap_lookupnet(ifname, &ipv4_network, &ipv4_network_mask, pcap_error_buffer) == -1) {
+    if(pcap_lookupnet(ifname, &ipv4_network, &ipv4_network_mask, pcap_error_buffer) == -1) {//提取接口名的ip&mask配置---comment by rwp 20200226
       ntop->getTrace()->traceEvent(TRACE_WARNING, "Unable to read IPv4 address of %s: %s",
 				   ifname, pcap_error_buffer);
     } else {
@@ -630,7 +630,7 @@ int NetworkInterface::dumpFlow(time_t when, Flow *f) {
 	mqtt.mid = 0;
 	mqtt.qos = 0;
 	mqtt.retain = false;
-	mqtt.topic = "/root/flow_json";
+	mqtt.topic = "/data/dfi/flow_stats_json";
 
 	//转换为带时标的JSON以便平台入库
 	char timeStr[100];
@@ -2710,7 +2710,7 @@ void NetworkInterface::periodicStatsUpdate() {
 	mqtt.mid = 0;
 	mqtt.qos = 0;
 	mqtt.retain = false;
-	mqtt.topic = "/root/ifstats_json";
+	mqtt.topic = "/data/dfi/if_stats_json";
 	string _pl = pt->json(this);
 	mqtt.payload.insert(mqtt.payload.end(), _pl.begin(), _pl.end());
 	
