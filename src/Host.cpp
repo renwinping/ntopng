@@ -907,7 +907,7 @@ void Host::periodic_stats_update(void *user_data, bool quick) {
 	   mqtt.mid = 0;
 	   mqtt.qos = 0;
 	   mqtt.retain = false;
-	   mqtt.topic = "/root/host_json";
+	   mqtt.topic = "/data/dfi/host_stats_json";
 	    string _pl = rsp;
 	   mqtt.payload.insert(mqtt.payload.end(), _pl.begin(), _pl.end());
 	   ntop->SendMq(&mqtt);
@@ -1446,6 +1446,8 @@ void Host::getJSONObject(json_object *my_object) {
 		json_object_object_add(my_object, "vlan", /*vlan_id*/json_object_new_int64(get_vlan_id()));
 		json_object_object_add(my_object, "ipkey", json_object_new_int64(get_ip()->key()));
 		json_object_object_add(my_object, "name", json_object_new_string(get_visual_name(buf, sizeof(buf))));
+		json_object_object_add(my_object, "first_seen", json_object_new_int64(get_first_seen()));
+		json_object_object_add(my_object, "last_seen", json_object_new_int64(get_last_seen()));
 
 		HostStats* host_stats = this->getHostStats();
 		json_object_object_add(my_object, "bytes_thpt", json_object_new_double(host_stats->getBytesThpt()));
