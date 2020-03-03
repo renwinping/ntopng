@@ -105,7 +105,7 @@ void LocalHostStats::updateStats(struct timeval *tv) {
 	mqtt.mid = 0;
 	mqtt.qos = 0;
 	mqtt.retain = false;
-	mqtt.topic = "/root/host_stats_json";
+	mqtt.topic = "/data/dfi/localhost_stats_json";
 	string _pl = pt->json(getHost()->getInterface());
 	mqtt.payload.insert(mqtt.payload.end(), _pl.begin(), _pl.end());
 
