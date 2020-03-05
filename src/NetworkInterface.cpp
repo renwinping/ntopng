@@ -1643,7 +1643,7 @@ void NetworkInterface::purgeIdle(time_t when, bool force_idle) {
   if(flowHashing) {
     FlowHashing *current, *tmp;
 
-    HASH_ITER(hh, flowHashing, current, tmp) {
+    HASH_ITER(hh, flowHashing, current, tmp) {//遍历迭代列表处理子接口---comment by rwp 20200305
       if(current->iface)
 	current->iface->purgeIdle(when, force_idle);
     }
@@ -4922,7 +4922,7 @@ u_int NetworkInterface::purgeIdleFlows(bool force_idle) {
 #endif
     n = (flows_hash ? flows_hash->purgeIdle(force_idle) : 0);
 
-    next_idle_flow_purge = last_packet_time + FLOW_PURGE_FREQUENCY;
+    next_idle_flow_purge = last_packet_time + FLOW_PURGE_FREQUENCY;//2秒清理流状态---comment by rwp 20200305
     return(n);
   }
 }
@@ -5028,7 +5028,7 @@ u_int NetworkInterface::purgeIdleHosts(bool force_idle) {
     // ntop->getTrace()->traceEvent(TRACE_INFO, "Purging idle hosts");
     n = (hosts_hash ? hosts_hash->purgeIdle(force_idle) : 0);
     
-    next_idle_host_purge = last_packet_time + HOST_PURGE_FREQUENCY;
+    next_idle_host_purge = last_packet_time + HOST_PURGE_FREQUENCY;//3秒清理主机状态---comment by rwp 2020305
     return(n);
   }
 }
@@ -5051,7 +5051,7 @@ u_int NetworkInterface::purgeIdleMacsASesCountriesVlansArpMatrix(bool force_idle
       + (vlans_hash ? vlans_hash->purgeIdle(force_idle) : 0)
       + (arp_hash_matrix ? arp_hash_matrix->purgeIdle(force_idle) : 0);
 
-    next_idle_other_purge = last_packet_time + OTHER_PURGE_FREQUENCY;
+    next_idle_other_purge = last_packet_time + OTHER_PURGE_FREQUENCY;//5秒清理其它hashtable表---comment by rwp 2020305
     
     return(n);
   }

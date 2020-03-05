@@ -42,7 +42,7 @@ PcapInterface::PcapInterface(const char *name) : NetworkInterface(name) {
   emulate_traffic_directions = false;
   read_pkts_from_pcap_dump = read_pkts_from_pcap_dump_done = false;
   
-  if((stat(name, &buf) == 0) || (name[0] == '-') || !strncmp(name, "stdin", 5)) {
+  if((stat(name, &buf) == 0) || (name[0] == '-') || !strncmp(name, "stdin", 5)) { //根据参数来实例化是离线分析还是实时抓包---comment by rwp 20200305
     /*
       The file exists so we need to check if it's a 
       text file or a pcap file
@@ -70,7 +70,7 @@ PcapInterface::PcapInterface(const char *name) : NetworkInterface(name) {
 
       ntop->getTrace()->traceEvent(TRACE_NORMAL, "Reading packets from pcap file %s...", ifname);
       read_pkts_from_pcap_dump = true, purge_idle_flows_hosts = false;      
-      pcap_datalink_type = pcap_datalink(pcap_handle);
+      pcap_datalink_type = pcap_datalink(pcap_handle);//返回链路层上的一个适配器。返回链路层的类型，链路层的类型包括DLT_EN10MB\DLT_IEEE802等 ---comment by rwp 20200305
     }
   } else {
     pcap_handle = pcap_open_live(ifname, ntop->getGlobals()->getSnaplen(ifname),
@@ -189,7 +189,7 @@ static void* packetPollLoop(void* ptr) {
   while(!iface->isRunning()) sleep(1);
 
   do {
-    if(pcap_list != NULL) {
+    if(pcap_list != NULL) { //pcap的列表文件名
       char path[256], *fname;
       pcap_t *pcap_handle;
 
@@ -242,14 +242,14 @@ static void* packetPollLoop(void* ptr) {
 
     while((pd != NULL) 
 	  && iface->isRunning() 
-	  && (!ntop->getGlobals()->isShutdown())) {
+	  && (!ntop->getGlobals()->isShutdown())) { //处理单个接口或文件的抓包解析---comment by rwp 20200305
       const u_char *pkt;
       struct pcap_pkthdr *hdr;
       int rc;
 
       while(iface->idle()) { iface->purgeIdle(time(NULL)); sleep(1); }
 
-      if(fd > 0) {
+      if(fd > 0) { //若fd（可select）的可用，则用select来判断可读性---comment  by rwp 20200305
 	fd_set rset;
 	struct timeval tv;
 	
@@ -263,8 +263,8 @@ static void* packetPollLoop(void* ptr) {
 	}
       }
 
-      if((rc = pcap_next_ex(pd, &hdr, &pkt)) > 0) {
-	if(iface->reproducePcapOriginalSpeed()) {
+      if((rc = pcap_next_ex(pd, &hdr, &pkt)) > 0) { // 从interface或离线记录文件获取一个报文---comment by rwp 20200305
+	if(iface->reproducePcapOriginalSpeed()) { //如果配置了“减速”则单包延时处理---comment by rwp 20200305
 	  struct timeval now;
 	    
 	  gettimeofday(&now, NULL);
