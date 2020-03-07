@@ -1572,7 +1572,7 @@ bool Flow::equal(const IpAddress *_cli_ip, const IpAddress *_srv_ip,
   if(cli_ip && cli_ip->equal(_cli_ip)
      && srv_ip && srv_ip->equal(_srv_ip)
      && _cli_port == cli_port && _srv_port == srv_port) {
-    *src2srv_direction = true;
+    *src2srv_direction = true;//因为实例化流时已确认首包中src是cli故，当与客户端同向时即为CS方向---comment by rwp 20200307
     return(true);
   } else if(srv_ip && srv_ip->equal(_cli_ip)
 	    && cli_ip && cli_ip->equal(_srv_ip)
