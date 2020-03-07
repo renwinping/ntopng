@@ -910,7 +910,7 @@ Flow* NetworkInterface::getFlow(Mac *srcMac, Mac *dstMac,
 		ret->key());
 
     if(flows_hash->add(ret, false /* Don't lock, we're inline with the purgeIdle */)) {
-      *src2dst_direction = true;
+      *src2dst_direction = true;//首次发现包时确定方向（tcp/cs）,1:c-->s 0:s-->C---comment by rwp 20200307
     } else {
       /* Note: this should never happen as we are checking hasEmptyRoom() */
       delete ret;
@@ -1622,6 +1622,8 @@ bool NetworkInterface::processPacket(u_int32_t bridge_iface_idx,
 /* **************************************************** */
 
 void NetworkInterface::purgeIdle(time_t when, bool force_idle) {
+	ntop->getTrace()->traceEvent(TRACE_WARNING, "###enter purgeIdle() Purged idle object(flows:%u,hosts:%u) on iface:%s",
+		getNumFlows(), getNumHosts(), ifname);
   if(purge_idle_flows_hosts) {
     u_int n, m, o;
 
@@ -1699,7 +1701,7 @@ bool NetworkInterface::dissectPacket(u_int32_t bridge_iface_idx,
   time = ((uint64_t) h->ts.tv_sec) * 1000 + h->ts.tv_usec / 1000;
 
 datalink_check:
-  if(pcap_datalink_type == DLT_NULL) {
+  if(pcap_datalink_type == DLT_NULL) { //处理二层包---comment by rwp 20200307
     memcpy(&null_type, &packet[eth_offset], sizeof(u_int32_t));
 
     switch(null_type) {
@@ -1782,7 +1784,7 @@ datalink_check:
       break;
   }
 
-decode_packet_eth:
+decode_packet_eth: //处理“二层包”协议--comment by rwp 20200307
   switch(eth_type) {
   case ETHERTYPE_PPOE:
     ip_offset += 6 /* PPPoE */;
@@ -2287,7 +2289,7 @@ decode_packet_eth:
  dissect_packet_end:
 
   /* Live packet dump to mongoose */
-  if(num_live_captures > 0)
+  if(num_live_captures > 0) //此处可改造为存pcap---comment by rwp 20200307
     deliverLiveCapture(h, packet, *flow);
 
   return(pass_verdict);
