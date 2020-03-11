@@ -101,15 +101,15 @@ void GenericHash::cleanup() {
 
 bool GenericHash::add(GenericHashEntry *h, bool do_lock) {
   if(hasEmptyRoom()) {
-    u_int32_t hash = (h->key() % num_hashes);
+    u_int32_t hash = (h->key() % num_hashes);//链表条目取hashid,决定插入那个key槽---comment by rwp 20200311
 
     if(do_lock)
       locks[hash]->wrlock(__FILE__, __LINE__);
 
     h->set_hash_table(this);
     h->set_hash_entry_id(last_entry_id++);
-    h->set_next(table[hash]);
-    table[hash] = h;
+    h->set_next(table[hash]);//下一条指向头元素
+    table[hash] = h;//新元素变成“头”
     current_size++;
 
     if(do_lock)
@@ -136,6 +136,7 @@ void GenericHash::walkAllStates(bool (*walker)(GenericHashEntry *h, void *user_d
   //如果存在“闲置态”列表则清除之，此函数五秒一次---comment by rwp 20200307
   if(cur_idle) {
     if(!cur_idle->empty()) {
+		printf("@@@@@walkAllStates function clean the idle entitys, num:%d\n",cur_idle->size());
       for(vector<GenericHashEntry*>::const_iterator it = cur_idle->begin(); it != cur_idle->end(); ++it) {
 	walker(*it, user_data);//调用回调函数：如ghs[i]->walkAllStates(generic_periodic_hash_entry_state_update, &periodic_ht_state_update_user_data); 一般用于减少“计数器”等
 	delete *it;//删除条目---comment by rwp 20200307
@@ -200,7 +201,8 @@ bool GenericHash::walk(u_int32_t *begin_slot,
   bool found = false;
   u_int16_t tot_matched = 0;
 
-  for(u_int hash_id = *begin_slot; hash_id < num_hashes; hash_id++) {
+  //从所有hash“插槽”Key中的队列中调用“回调”取得非“idel”状态的值并返回槽号
+  for(u_int hash_id = *begin_slot; hash_id < num_hashes; hash_id++) {//begin_slot用于指定hash中查找“开始插槽”---comment by rwp 20200311
     if(table[hash_id] != NULL) {
       GenericHashEntry *head;
 
@@ -220,7 +222,7 @@ bool GenericHash::walk(u_int32_t *begin_slot,
 
 	if(!head->idle()) {
 	  bool matched = false;
-	  bool rc = walker(head, user_data, &matched);
+	  bool rc = walker(head, user_data, &matched);//调用回调处理数据---comment by rwp 20200311
 
 	  if(matched) tot_matched++;
 
