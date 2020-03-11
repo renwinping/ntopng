@@ -1622,7 +1622,7 @@ bool NetworkInterface::processPacket(u_int32_t bridge_iface_idx,
 /* **************************************************** */
 
 void NetworkInterface::purgeIdle(time_t when, bool force_idle) {
-	ntop->getTrace()->traceEvent(TRACE_WARNING, "###enter purgeIdle() Purged idle object(flows:%u,hosts:%u) on iface:%s",
+	ntop->getTrace()->traceEvent(TRACE_DEBUG, "###enter purgeIdle() Purged idle object(flows:%u,hosts:%u) on iface:%s",
 		getNumFlows(), getNumHosts(), ifname);
   if(purge_idle_flows_hosts) {
     u_int n, m, o;

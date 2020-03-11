@@ -81,7 +81,7 @@ HashEntryState GenericHashEntry::get_state() const {
 /* ***************************************** */
 
 bool GenericHashEntry::is_hash_entry_state_idle_transition_ready() const {
-  return isIdle(MAX_LOCAL_HOST_IDLE);
+  return isIdle(MAX_LOCAL_HOST_IDLE);//Ö÷»ú300Ãë---comment by rwp 20200307
 }
 
 /* ***************************************** */

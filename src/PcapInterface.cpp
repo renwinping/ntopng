@@ -322,8 +322,16 @@ static void* packetPollLoop(void* ptr) {
 #endif
 	}
       } else if(rc < 0) {
-	if(iface->read_from_pcap_dump())
-	  break;
+		  if (iface->read_from_pcap_dump())
+		  {
+			  ntop->getTrace()->traceEvent(TRACE_NORMAL, " pcap_next_ex packet polling pacp file finished %s",
+				  iface->get_name());
+
+			  //测试---清理一次解决在文件结束后host状态和ifstats中的统计不对
+			  //iface->purgeIdle(time(NULL));
+			  //    iface->periodicStatsUpdate();
+			  break;//---debug 
+		  }
       } else {
 	/* No packet received before the timeout */
 	iface->purgeIdle(time(NULL));

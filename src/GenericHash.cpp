@@ -133,11 +133,12 @@ void GenericHash::walkAllStates(bool (*walker)(GenericHashEntry *h, void *user_d
     idle_entries = NULL;
   }
 
+  //如果存在“闲置态”列表则清除之，此函数五秒一次---comment by rwp 20200307
   if(cur_idle) {
     if(!cur_idle->empty()) {
       for(vector<GenericHashEntry*>::const_iterator it = cur_idle->begin(); it != cur_idle->end(); ++it) {
-	walker(*it, user_data);
-	delete *it;
+	walker(*it, user_data);//调用回调函数：如ghs[i]->walkAllStates(generic_periodic_hash_entry_state_update, &periodic_ht_state_update_user_data); 一般用于减少“计数器”等
+	delete *it;//删除条目---comment by rwp 20200307
 	entry_state_transition_counters.num_purged++;
       }
     }
@@ -384,7 +385,7 @@ u_int GenericHash::purgeIdle(bool force_idle) {
     advance(it, idle_entries_shadow_old_size);
 
     for(; it != idle_entries_shadow->end(); it++) {
-      (*it)->set_hash_entry_state_idle();
+      (*it)->set_hash_entry_state_idle();//此处可由子类重载实现，如主机中减少主机数decHostNum等---comment by rwp 20200307
       entry_state_transition_counters.num_idle_transitions++;
     }
   }
