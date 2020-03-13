@@ -248,6 +248,8 @@ Ntop::~Ntop() {
   if(prefs)   { delete prefs; prefs = NULL;     }
   if(globals) { delete globals; globals = NULL; }
 
+  if(m_pLocalCom)   { delete m_pLocalCom; m_pLocalCom = NULL;  }
+
 #ifdef __linux__
   if(inotify_fd > 0)  close(inotify_fd);
 #endif
