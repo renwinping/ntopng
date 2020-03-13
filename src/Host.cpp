@@ -1441,6 +1441,7 @@ void Host::getJSONObject(json_object *my_object) {
 	{
 		char buf[64];
 		char ip_buf[64];
+		json_object_object_add(my_object, "INTERFACE", json_object_new_string(getInterface()->get_name()));
 		json_object_object_add(my_object, "ip", json_object_new_string(get_ip()->print(ip_buf, sizeof(ip_buf))));
 		json_object_object_add(my_object, "mac", json_object_new_string(getMac()->print(buf, sizeof(buf))));
 		json_object_object_add(my_object, "vlan", /*vlan_id*/json_object_new_int64(get_vlan_id()));
@@ -1452,10 +1453,10 @@ void Host::getJSONObject(json_object *my_object) {
 		HostStats* host_stats = this->getHostStats();
 		json_object_object_add(my_object, "bytes_thpt", json_object_new_double(host_stats->getBytesThpt()));
 		json_object_object_add(my_object, "pkts_thpt", json_object_new_double(host_stats->getPacketsThpt()));
-		json_object_object_add(my_object, "sendBytes", json_object_new_int64(host_stats->getNumBytesSent()));
-		json_object_object_add(my_object, "sendPackets", json_object_new_int64(host_stats->getNumPktsSent()));
-		json_object_object_add(my_object, "recvBytes", json_object_new_int64(host_stats->getNumBytesRcvd()));
-		json_object_object_add(my_object, "recvPackets", json_object_new_int64(host_stats->getNumPktsRcvd()));
+		json_object_object_add(my_object, "send_bytes", json_object_new_int64(host_stats->getNumBytesSent()));
+		json_object_object_add(my_object, "send_packets", json_object_new_int64(host_stats->getNumPktsSent()));
+		json_object_object_add(my_object, "recv_bytes", json_object_new_int64(host_stats->getNumBytesRcvd()));
+		json_object_object_add(my_object, "recv_packets", json_object_new_int64(host_stats->getNumPktsRcvd()));
 		
 		//增加4层统计
 		json_object*  l4stats_json = json_object_new_object();

@@ -79,7 +79,9 @@ json_object* NetworkInterfaceTsPoint::toJsonObject(NetworkInterface *iface)
 
 	//Ê±¼äJSON
 	//snprintf(buf, sizeof(buf), "%u", this->timestamp);
+
 	json_object_object_add(my_object, "timestamp", json_object_new_int64(timestamp));
+	json_object_object_add(my_object, "INTERFACE", json_object_new_string(iface->get_name()));
 	json_object_object_add(my_object, "packets", json_object_new_int64(ethStats.getNumPackets()));
 	json_object_object_add(my_object, "bytes", json_object_new_int64(ethStats.getNumBytes()));
 	json_object_object_add(my_object, "throughput_bps", json_object_new_double(bytes_thpt.getThpt()));
