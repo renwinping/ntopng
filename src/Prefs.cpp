@@ -53,7 +53,9 @@ Prefs::Prefs(Ntop *_ntop) {
   enable_mac_ndpi_stats = false;
   auto_assigned_pool_id = NO_HOST_POOL_ID;
   default_l7policy = PASS_ALL_SHAPER_ID;
-  num_ts_slots = CONST_DEFAULT_TS_NUM_SLOTS, ts_num_steps = CONST_DEFAULT_TS_NUM_STEPS;
+#define CONST_DEFAULT_TS_NUM_SLOTS_KY 12 //一般接口定义12个点正好，5*12秒
+#define CONST_DEFAULT_TS_NUM_STEPS_KY 0 
+  num_ts_slots = /*CONST_DEFAULT_TS_NUM_SLOTS*/CONST_DEFAULT_TS_NUM_SLOTS_KY, ts_num_steps = /*CONST_DEFAULT_TS_NUM_STEPS*/CONST_DEFAULT_TS_NUM_STEPS_KY;
   device_protocol_policies_enabled = false, enable_vlan_trunk_bridge = false;
   max_extracted_pcap_bytes = CONST_DEFAULT_MAX_EXTR_PCAP_BYTES;
   auth_session_duration = HTTP_SESSION_DURATION;
