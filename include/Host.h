@@ -100,6 +100,8 @@ class Host : public GenericHashEntry, public AlertableEntity {
 
   virtual ~Host();
 
+  virtual HostStats* getHostStats() { return stats;}
+
   virtual bool isLocalHost()  const = 0;
   virtual bool isSystemHost() const = 0;
   inline  bool isBroadcastDomainHost() const { return(is_in_broadcast_domain); };
@@ -218,6 +220,7 @@ class Host : public GenericHashEntry, public AlertableEntity {
   char* get_hostkey(char *buf, u_int buf_len, bool force_vlan=false);
   char* get_tskey(char *buf, size_t bufsize);
 
+  void getJSONObject(json_object *my_object);
   bool is_hash_entry_state_idle_transition_ready() const;
   void periodic_hash_entry_state_update(void *user_data);
   void periodic_stats_update(void *user_data, bool quick);

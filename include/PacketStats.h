@@ -25,7 +25,7 @@
 #include "ntop_includes.h"
 
 class PacketStats {
- private:
+  public:
   u_int64_t upTo64, upTo128, upTo256,
     upTo512, upTo1024, upTo1518,
     upTo2500, upTo6500, upTo9000,

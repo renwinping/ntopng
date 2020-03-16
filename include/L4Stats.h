@@ -10,6 +10,7 @@ class L4Stats {
 
  public:
   void luaStats(lua_State* vm);
+  string stringableStats();
   void luaAnomalies(lua_State* vm);
   void serialize(json_object *obj);
   void deserialize(json_object *obj);

@@ -108,6 +108,7 @@ class HostStats: public TimeseriesStats {
   virtual HTTPstats* getHTTPstats()  const { return(NULL); }
   virtual DnsStats*  getDNSstats()   const { return(NULL); }
   virtual ICMPstats* getICMPstats()  const { return(NULL); }
+  virtual PacketStats*  getPacketStats(bool isSend)   { return (isSend ? (&sent_stats) : (&recv_stats)); }
 };
 
 #endif

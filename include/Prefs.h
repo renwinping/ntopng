@@ -37,6 +37,7 @@ typedef struct {
 
 class Prefs {
  private:
+
   u_int8_t num_deferred_interfaces_to_register;
   pcap_direction_t captureDirection;
   char **deferred_interfaces_to_register, *cli;
@@ -122,6 +123,8 @@ class Prefs {
   char *es_type, *es_index, *es_url, *es_user, *es_pwd;
   char *mysql_host, *mysql_dbname, *mysql_tablename, *mysql_user, *mysql_pw;
   int mysql_port;
+  char *mqtt_id, *mqtt_host, *mqtt_port, *mqtt_timeout;//添加mqtt的参数---add by rwp 20203003
+  int  imqtt_port, imqtt_id;
   char *ls_host,*ls_port,*ls_proto;
   bool has_cmdl_trace_lvl; /**< Indicate whether a verbose level 
 			      has been provided on the command line.*/
@@ -281,6 +284,9 @@ class Prefs {
   inline bool use_promiscuous()         { return(use_promiscuous_mode);  };
   inline char* get_mysql_host()         { return(mysql_host);            };
   inline int get_mysql_port()           { return(mysql_port);            };
+  inline char* get_mqtt_host()          { return(mqtt_host);             };
+  inline int get_mqtt_port()            { return(imqtt_port);            };
+  inline int get_mqtt_id()              { return(imqtt_id);              };
   inline char* get_mysql_dbname()       { return(mysql_dbname);          };
   inline char* get_mysql_tablename()    { return(mysql_tablename);       };
   inline char* get_mysql_user()         { return(mysql_user);            };

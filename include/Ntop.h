@@ -23,6 +23,7 @@
 #define _NTOP_CLASS_H_
 
 #include "ntop_includes.h"
+#include "../../common/msgrWrapper.h"
 
 /** @defgroup Ntop Ntop
  * Main ntopng group.
@@ -38,6 +39,7 @@ class NtopPro;
  */
 class Ntop {
  private:
+  CIntecomWrapper *m_pLocalCom;
   bool ndpiReloadInProgress;
   Bloom *resolvedHostsBloom; /* Used by all redis class instances */
   AddressTree local_interface_addresses;
@@ -475,7 +477,10 @@ class Ntop {
   inline ndpi_protocol_category_t get_ndpi_proto_category(ndpi_protocol proto) { return(ndpi_get_proto_category(get_ndpi_struct(), proto)); };
   ndpi_protocol_category_t get_ndpi_proto_category(u_int protoid);
   void setnDPIProtocolCategory(u_int16_t protoId, ndpi_protocol_category_t protoCategory);
-  inline void reloadPeriodicScripts() { if(pa) pa->reloadVMs(); };
+  inline void reloadPeriodicScripts() { if (pa) pa->reloadVMs(); };
+public:
+  int registerMqttCli();
+  int SendMq(ASDUMESSGE* pMsg);
 };
 
 extern Ntop *ntop;

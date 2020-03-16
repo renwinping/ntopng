@@ -46,6 +46,9 @@ class HostTimeseriesPoint: public TimeseriesPoint {
   HostTimeseriesPoint(const LocalHostStats * const hs);
   virtual ~HostTimeseriesPoint();
   virtual void lua(lua_State* vm, NetworkInterface *iface);
+  string json(NetworkInterface *iface);
+  string json();
+  json_object* toJsonObject(NetworkInterface *iface);
 };
 
 #endif /* _HOST_TIMESERIES_POINT_H_ */

@@ -30,7 +30,8 @@ class TimeseriesPoint {
 
   virtual ~TimeseriesPoint() {};
   virtual void lua(lua_State* vm, NetworkInterface *iface) = 0;
+  virtual string json()=0;
+  virtual string json(NetworkInterface *iface) = 0;
 };
-
 #endif /* _TIMESERIES_POINT_H_ */
 

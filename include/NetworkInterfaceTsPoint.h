@@ -32,11 +32,19 @@ class NetworkInterfaceTsPoint: public TimeseriesPoint {
   u_int hosts, local_hosts;
   u_int devices, flows, http_hosts;
   u_int engaged_alerts;
-  TcpPacketStats tcpPacketStats;
+  TcpPacketStats tcpPacketStats;//异常tcp包统计---comment by rwp 20200226
   PacketStats packetStats;
   L4Stats l4Stats;
-
+  /*--添加一个以态层的统计，可用于操作本层吞吐率---add by rwp 20200223*/
+  EthStats ethStats;
+  ThroughputStats bytes_thpt;
+  ThroughputStats pkts_thpt;
+  //
   virtual void lua(lua_State* vm, NetworkInterface *iface);
+  string json(NetworkInterface *iface);
+  string json();
+  json_object* toJsonObject(NetworkInterface *iface);
+  char* serialize();
 };
 
 #endif /* _NETWORK_INTERFACE_TS_POINT_H_ */

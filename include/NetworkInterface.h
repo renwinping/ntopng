@@ -57,7 +57,7 @@ class NIndexFlowDB;
 #endif
 
 typedef struct {
-  u_int32_t criteria;        /* IP address, interface... */
+  u_int32_t criteria;        /* IP address, interface... */ //(评判或作决定的) 标准，准则，原则;
   NetworkInterface *iface;
   UT_hash_handle hh;         /* makes this structure hashable */
 } FlowHashing;
@@ -168,7 +168,7 @@ class NetworkInterface : public AlertableEntity {
 
   TcpFlowStats tcpFlowStats;
   TcpPacketStats tcpPacketStats;
-  ThroughputStats bytes_thpt, pkts_thpt;
+  ThroughputStats bytes_thpt, pkts_thpt;//指L2层的吞吐率--comment by rwp 20200225
 
   /* Frequent Items */
   FrequentTrafficItems *frequentProtocols;

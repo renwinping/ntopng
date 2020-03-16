@@ -72,10 +72,12 @@ class TimeseriesStats: public GenericTrafficElement {
   inline u_int32_t getTotalHostUnreachableNumFlowsAsClient() const { return(host_unreachable_flows_as_client);  };
   inline u_int32_t getTotalHostUnreachableNumFlowsAsServer() const { return(host_unreachable_flows_as_server);  };
   u_int32_t getTotalAlerts() const;
+  json_object* getJSONObject( NetworkInterface *iface, bool host_details, bool verbose, bool tsLua);
   inline u_int32_t getNumFlowAlerts() const { return(num_flow_alerts); };
   void luaStats(lua_State* vm, NetworkInterface *iface, bool host_details, bool verbose, bool tsLua = false);
   virtual u_int16_t getNumActiveContactsAsClient() { return 0; }
   virtual u_int16_t getNumActiveContactsAsServer() { return 0; }
+  L4Stats* getL4Stats() { return &l4stats; }
 };
 
 #endif
