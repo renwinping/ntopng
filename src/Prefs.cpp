@@ -99,7 +99,7 @@ Prefs::Prefs(Ntop *_ntop) {
   pid_path = strdup(DEFAULT_PID_PATH);
   packet_filter = NULL;
   num_interfaces = 0, enable_auto_logout = true, enable_auto_logout_at_runtime = true;
-  dump_flows_on_es = dump_flows_on_mysql = dump_flows_on_ls = false;
+  dump_flows_on_es = dump_flows_on_mysql = dump_flows_on_ls =  dump_flows_on_mqtt = false;
   routing_mode_enabled = false;
   global_dns_forging_enabled = false;
 #if defined(NTOPNG_PRO) && defined(HAVE_NINDEX)
@@ -1461,6 +1461,8 @@ int Prefs::setOption(int optkey, char *optarg) {
 							  strerror(errno));
 					  else
 						  imqtt_id = (int)l;
+
+					  dump_flows_on_mqtt = true;
 				  }
 				  else
 					  ntop->getTrace()->traceEvent(TRACE_WARNING, "Invalid format for -a mqtt;....");
