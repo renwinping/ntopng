@@ -23,7 +23,7 @@
 #define _NTOP_CLASS_H_
 
 #include "ntop_includes.h"
-#include "../../common/msgrWrapper.h"
+#include "msgrWrapper.h"
 
 /** @defgroup Ntop Ntop
  * Main ntopng group.
