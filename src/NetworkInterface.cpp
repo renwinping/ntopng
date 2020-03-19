@@ -904,10 +904,10 @@ Flow* NetworkInterface::getFlow(Mac *srcMac, Mac *dstMac,
 	char ip_src[32] = "";
 	char ip_dst[32] = "";
 	ntop->getTrace()->traceEvent(TRACE_NORMAL,
-		"********add new flow in getFlow [vlan:%u,src_ip:%s, src_port:%u,dst_ip:%s, dst_port:%u,flowKey:%u]",vlan_id, 
+		"********add new flow in getFlow [vlan:%u,src_ip:%s, src_port:%u,dst_ip:%s, dst_port:%u,flowKey:%u,protocol:%u]",vlan_id, 
 		src_ip->print(ip_src, sizeof(ip_src)), src_port, 
 		dst_ip->print(ip_dst, sizeof(ip_dst)), dst_port,
-		ret->key());
+		ret->key(),l4_proto);
 
     if(flows_hash->add(ret, false /* Don't lock, we're inline with the purgeIdle */)) {
       *src2dst_direction = true;//首次发现包时确定方向（tcp/cs）,1:c-->s 0:s-->C---comment by rwp 20200307
