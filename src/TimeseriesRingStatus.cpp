@@ -45,7 +45,7 @@ TimeseriesRingStatus::~TimeseriesRingStatus() {
 /* *************************************** */
 
 void TimeseriesRingStatus::insert(TimeseriesPoint *pt, time_t when) {
-  ntop->getTrace()->traceEvent(TRACE_WARNING, "insert timeseries(this:%p,max_points:%u, available_points:%u, point_idx:%u, num_steps:%u, cur_steps:%u)",this, max_points, available_points, point_idx, num_steps, cur_steps);//add by rwp 20200218
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "insert timeseries(this:%p,max_points:%u, available_points:%u, point_idx:%u, num_steps:%u, cur_steps:%u)",this, max_points, available_points, point_idx, num_steps, cur_steps);//add by rwp 20200218
   if(ts_points[point_idx])
     delete ts_points[point_idx];
 
@@ -71,7 +71,7 @@ void TimeseriesRingStatus::lua(lua_State* vm, NetworkInterface *iface) {
 
   //调试写“时间序列”值---add by rwp 20200220
   //ntop->getTrace()->traceEvent(TRACE_INFO, "luable the timeseries in TimeseriesRingStatus::lua(),available_points:%u", available_points);//add by rwp 20200218
-  printf("luable the timeseries in TimeseriesRingStatus::lua(),available_points:%u\n", available_points);//add by rwp 20200218
+  //printf("luable the timeseries in TimeseriesRingStatus::lua(),available_points:%u\n", available_points);//add by rwp 20200218
   for(int i=0; i < available_points; i++) {
     TimeseriesPoint *pt = ts_points[idx];
 
