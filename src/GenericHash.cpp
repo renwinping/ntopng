@@ -136,14 +136,14 @@ void GenericHash::walkAllStates(bool (*walker)(GenericHashEntry *h, void *user_d
   //如果存在“闲置态”列表则清除之，此函数五秒一次---comment by rwp 20200307
   if(cur_idle) {
     if(!cur_idle->empty()) {
-		printf("@@@@@walkAllStates function clean the idle entitys, num:%d\n",cur_idle->size());
+	  ntop->getTrace()->traceEvent(TRACE_ERROR, "@@@@@walkAllStates function clean the idle entitys, num:%d\n",cur_idle->size());
       for(vector<GenericHashEntry*>::const_iterator it = cur_idle->begin(); it != cur_idle->end(); ++it) {
 	walker(*it, user_data);//调用回调函数：如ghs[i]->walkAllStates(generic_periodic_hash_entry_state_update, &periodic_ht_state_update_user_data); 一般用于减少“计数器”等
 	delete *it;//删除条目---comment by rwp 20200307
 	entry_state_transition_counters.num_purged++;
       }
     }
-
+	ntop->getTrace()->traceEvent(TRACE_ERROR, "@@@@@walkAllStates delete cur_idle vector:0x%x\n", cur_idle);
     delete cur_idle;
   }
 
