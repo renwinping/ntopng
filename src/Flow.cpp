@@ -872,7 +872,7 @@ bool Flow::dumpFlow(const struct timeval *tv, NetworkInterface *dumper) {
      || ntop->get_export_interface()
 #endif
      ) {
-    if(!ntop->getPrefs()->is_tiny_flows_export_enabled() && isTiny()) {
+    if(!ntop->getPrefs()->is_tiny_flows_export_enabled() && isTiny()) {//没使能“导出小流”时，忽略小流（大小或包）导出
 #ifdef TINY_FLOWS_DEBUG
       ntop->getTrace()->traceEvent(TRACE_NORMAL,
 				   "Skipping tiny flow dump "
@@ -904,8 +904,11 @@ bool Flow::dumpFlow(const struct timeval *tv, NetworkInterface *dumper) {
 
     /* Check for bytes, and not for packets, as with nprobeagent
        there are not packet counters, just bytes. */
-    if(!get_partial_bytes())
-      return rc; /* Nothing to dump */
+	if (!get_partial_bytes())
+		/*
+		 *因为如果流中无数据的话，长时间导出流量可能会影响上层统计，此处依然导出---comment by rwp 20200319
+		 */
+		;// return rc; /* Nothing to dump */
 
 #ifdef NTOPNG_PRO
     if(ntop->getPro()->has_valid_license() && ntop->getPrefs()->is_enterprise_edition())
@@ -1454,6 +1457,9 @@ void Flow::periodic_stats_update(void *user_data, bool quick) {
 
   memcpy(&last_update_time, tv, sizeof(struct timeval));
   GenericHashEntry::periodic_stats_update(user_data, quick);
+
+  //增加导出流的操作因为另外的stateupdate线程不是遍历全部而是“匹配返回”
+  //periodic_dump_check(tv);
 }
 
 /* *************************************** */
@@ -1969,10 +1975,23 @@ char* Flow::serialize(bool es_json) {
 /* *************************************** */
 
 json_object* Flow::flow2json() {
+  
+
+
   json_object *my_object;
   char buf[64], jsonbuf[64], *c;
   time_t t;
   const IpAddress *cli_ip = get_cli_ip_addr(), *srv_ip = get_srv_ip_addr();
+
+  //addFlow ********add new flow in getFlow [vlan:0,src_ip:192.168.1.70, src_port:32739,dst_ip:192.168.1.200, dst_port:41216,flowKey:2169578498]
+  //vlanId = _vlanId, protocol = _protocol, cli_port = _cli_port, srv_port = _srv_port;
+  char ip_src[32] = "";
+  char ip_dst[32] = "";
+  ntop->getTrace()->traceEvent(TRACE_NORMAL,
+	  "********flow2json [vlan:%u,src_ip:%s, src_port:%u,dst_ip:%s, dst_port:%u,flowKey:%u,protocol:%u]", vlanId,
+	  cli_ip->print(ip_src, sizeof(ip_src)), get_cli_port(),
+	  srv_ip->print(ip_dst, sizeof(ip_dst)), get_srv_port(),
+	  this->key(),protocol);//打印时用于与newflow日志成对至少一次
 
   if((my_object = json_object_new_object()) == NULL) return(NULL);
 
@@ -2297,7 +2316,7 @@ bool Flow::get_partial_traffic_stats_view(PartializableFlowTrafficStats *fts, bo
 bool Flow::update_partial_traffic_stats_db_dump() {  
   bool first_partial;
 
-  if(!get_partial_traffic_stats(&last_db_dump.partial, &last_db_dump.delta, &first_partial))
+  if(!get_partial_traffic_stats(&last_db_dump.partial, &last_db_dump.delta, &first_partial))//更新当前的统计数据并计算两次取值的“差值”统计---by rwp 20200319
     return(false);
 
   if(first_partial)
