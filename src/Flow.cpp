@@ -1988,10 +1988,10 @@ json_object* Flow::flow2json() {
   char ip_src[32] = "";
   char ip_dst[32] = "";
   ntop->getTrace()->traceEvent(TRACE_NORMAL,
-	  "********flow2json [vlan:%u,src_ip:%s, src_port:%u,dst_ip:%s, dst_port:%u,flowKey:%u,protocol:%u]", vlanId,
+	  "********flow2json [vlan:%u,src_ip:%s, src_port:%u,dst_ip:%s, dst_port:%u,flowKey:%u,protocol:%u,hash_state:%d]", vlanId,
 	  cli_ip->print(ip_src, sizeof(ip_src)), get_cli_port(),
 	  srv_ip->print(ip_dst, sizeof(ip_dst)), get_srv_port(),
-	  this->key(),protocol);//打印时用于与newflow日志成对至少一次
+	  this->key(),protocol, get_state());//打印时用于与newflow日志成对至少一次
 
   if((my_object = json_object_new_object()) == NULL) return(NULL);
 
