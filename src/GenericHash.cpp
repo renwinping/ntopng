@@ -157,7 +157,7 @@ void GenericHash::walkAllStates(bool (*walker)(GenericHashEntry *h, void *user_d
     So basically walkIdle always visit all hash table entries but, as it starts from walk_idle_start_hash_id,
     it guarantees that all entries get an equal chance to have their walker operations fully performed.
   */
-  u_int hash_id = walk_idle_start_hash_id;
+  u_int hash_id = walk_idle_start_hash_id;//公平考虑
 
   do {
     if(table[hash_id]) {
@@ -173,7 +173,7 @@ void GenericHash::walkAllStates(bool (*walker)(GenericHashEntry *h, void *user_d
 	  ntop->getTrace()->traceEvent(TRACE_ERROR, "Unexpected idle state found [%u]", head->get_state());
 
 	if(!head->idle()) {
-	  update_walk_idle_start_hash_id = walker(head, user_data);
+	  update_walk_idle_start_hash_id = walker(head, user_data);//注意这个回调只处理“非idle”条目
 
 	  /* Check if it is time to update the new start hash id */
 	  if(update_walk_idle_start_hash_id && new_walk_idle_start_hash_id == 0)
@@ -187,7 +187,7 @@ void GenericHash::walkAllStates(bool (*walker)(GenericHashEntry *h, void *user_d
     }
 
     hash_id = hash_id == num_hashes - 1 ? 0 /* Start over */ : hash_id + 1;
-  } while(hash_id != walk_idle_start_hash_id);
+  } while(hash_id != walk_idle_start_hash_id);//循环所有hash_id，相当于一个“圆形桶”遍历---comment by rwp 20200319
 
   walk_idle_start_hash_id = new_walk_idle_start_hash_id;
 }
