@@ -807,11 +807,11 @@ bool NetworkInterface::walker(u_int32_t *begin_slot,
 
   switch(wtype) {
   case walker_hosts:
-    ret = hosts_hash ? hosts_hash->walk(begin_slot, walk_all, walker, user_data) : false;
+    ret = hosts_hash ? hosts_hash->walk(begin_slot, walk_all, walker, user_data) : false;//调用形式：walker(&begin_slot, true, walker_ases, update_generic_element_stats, &periodic_stats_update_user_data);
     break;
 
   case walker_flows:
-    ret = flows_hash ? flows_hash->walk(begin_slot, walk_all, walker, user_data) : false;
+    ret = flows_hash ? flows_hash->walk(begin_slot, walk_all, walker, user_data) : false;//遍历所有流hash，处理“非idle态”节点（调用回调，如上更新统计）
     break;
 
   case walker_macs:
@@ -905,8 +905,8 @@ Flow* NetworkInterface::getFlow(Mac *srcMac, Mac *dstMac,
 	char ip_dst[32] = "";
 	ntop->getTrace()->traceEvent(TRACE_NORMAL,
 		"********add new flow in getFlow [vlan:%u,src_ip:%s, src_port:%u,dst_ip:%s, dst_port:%u,flowKey:%u,protocol:%u]",vlan_id, 
-		src_ip->print(ip_src, sizeof(ip_src)), src_port, 
-		dst_ip->print(ip_dst, sizeof(ip_dst)), dst_port,
+		src_ip->print(ip_src, sizeof(ip_src)), ntohs(src_port),
+		dst_ip->print(ip_dst, sizeof(ip_dst)), ntohs(dst_port),
 		ret->key(),l4_proto);
 
     if(flows_hash->add(ret, false /* Don't lock, we're inline with the purgeIdle */)) {
