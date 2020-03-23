@@ -51,7 +51,7 @@ string NetworkInterfaceTsPoint::json(NetworkInterface *iface)
 	if ((my_object = toJsonObject(iface)) != NULL) {
 
 		/* JSON string */
-		rsp = strdup(json_object_to_json_string(my_object));
+		rsp = strdup(json_object_to_json_string_ext(my_object, JSON_C_TO_STRING_PLAIN));
 
 		/* Free memory */
 		json_object_put(my_object);
