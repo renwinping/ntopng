@@ -897,7 +897,7 @@ void Host::periodic_stats_update(void *user_data, bool quick) {
 	  json_object_object_add(_hostJson, "timestamp", json_object_new_int64(tv->tv_sec));
 	  this->getJSONObject(_hostJson);
 	  /* JSON string */
-	  char* rsp = strdup(json_object_to_json_string(_hostJson));
+	  char* rsp = strdup(json_object_to_json_string_ext(_hostJson,JSON_C_TO_STRING_PLAIN));
 	  
 	  /* Free memory */
 	  json_object_put(_hostJson);
