@@ -409,7 +409,7 @@ static void addProtoJson(json_object *my_object, ProtoCounter *counter, const ch
   json_object_object_add(my_object, name, inner);
 }
 
-json_object* nDPIStats::getJSONObject(NetworkInterface *iface) {
+json_object* nDPIStats::getJSONObject(NetworkInterface *iface, bool hasCate /*= true*/) {
   char *unknown = iface->get_ndpi_proto_name(NDPI_PROTOCOL_UNKNOWN);
   json_object *my_object;
   json_object *inner, *inner1;
@@ -427,20 +427,23 @@ json_object* nDPIStats::getJSONObject(NetworkInterface *iface) {
     }
   }
 
-  inner = json_object_new_object();
-  for (int i = 0; i < NDPI_PROTOCOL_NUM_CATEGORIES; i++) {
-    if(cat_counters[i].bytes.sent + cat_counters[i].bytes.rcvd > 0) {
-      inner1 = json_object_new_object();
+  if (hasCate)
+  {
+	  inner = json_object_new_object();
+	  for (int i = 0; i < NDPI_PROTOCOL_NUM_CATEGORIES; i++) {
+		  if (cat_counters[i].bytes.sent + cat_counters[i].bytes.rcvd > 0) {
+			  inner1 = json_object_new_object();
 
-      json_object_object_add(inner1, "id",      json_object_new_int64(i));
-      json_object_object_add(inner1, "bytes_sent",   json_object_new_int64(cat_counters[i].bytes.sent));
-      json_object_object_add(inner1, "bytes_rcvd",   json_object_new_int64(cat_counters[i].bytes.rcvd));
-      json_object_object_add(inner1, "duration",json_object_new_int64(cat_counters[i].duration));
+			  json_object_object_add(inner1, "id", json_object_new_int64(i));
+			  json_object_object_add(inner1, "bytes_sent", json_object_new_int64(cat_counters[i].bytes.sent));
+			  json_object_object_add(inner1, "bytes_rcvd", json_object_new_int64(cat_counters[i].bytes.rcvd));
+			  json_object_object_add(inner1, "duration", json_object_new_int64(cat_counters[i].duration));
 
-      json_object_object_add(inner, iface->get_ndpi_category_name((ndpi_protocol_category_t)i), inner1);
-    }
+			  json_object_object_add(inner, iface->get_ndpi_category_name((ndpi_protocol_category_t)i), inner1);
+		  }
+	  }
+	  json_object_object_add(my_object, "categories", inner);
   }
-  json_object_object_add(my_object, "categories", inner);
 
   return(my_object);
 }
