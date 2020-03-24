@@ -1486,7 +1486,7 @@ void Host::getJSONObject(json_object *my_object) {
 		if (ndpi)
 		{
 			NetworkInterface* _if = getInterface();
-			json_object* json_ndpi = ndpi->getJSONObject(_if);
+			json_object* json_ndpi = ndpi->getJSONObject(_if,false);
 			json_object_object_add(my_object, "ndpi", json_ndpi);
 		}
 	}
