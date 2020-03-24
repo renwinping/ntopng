@@ -88,8 +88,8 @@ json_object* NetworkInterfaceTsPoint::toJsonObject(NetworkInterface *iface)
 	json_object_object_add(my_object, "throughput_pps", json_object_new_double(pkts_thpt.getThpt()));
 
 	json_object_object_add(my_object, "hosts", json_object_new_int64(hosts));
-	json_object_object_add(my_object, "local_hosts", json_object_new_int64(local_hosts));
-	json_object_object_add(my_object, "devices", json_object_new_int64(devices));
+	//json_object_object_add(my_object, "local_hosts", json_object_new_int64(local_hosts));
+	//json_object_object_add(my_object, "devices", json_object_new_int64(devices));
 	json_object_object_add(my_object, "flows", json_object_new_int64(flows));
 
 
@@ -100,10 +100,10 @@ json_object* NetworkInterfaceTsPoint::toJsonObject(NetworkInterface *iface)
 // 		json_object_object_add(my_object, "ndpi_stats",ndpi_json);
 // 	}
 	//Ìí¼ÓndpiÍ³¼ÆJSON
-	json_object*  local_stats_json = local_stats.getJSONObject();
-	if (local_stats_json) {
-		json_object_object_add(my_object, "local_stats", local_stats_json);
-	}
+// 	json_object*  local_stats_json = local_stats.getJSONObject();
+// 	if (local_stats_json) {
+// 		json_object_object_add(my_object, "local_stats", local_stats_json);
+// 	}
 
 	json_object*  tcpPacketStats_json = tcpPacketStats.getJSONObject();
 	if (tcpPacketStats_json) {
@@ -123,7 +123,7 @@ json_object* NetworkInterfaceTsPoint::toJsonObject(NetworkInterface *iface)
 
 	if (iface)
 	{
-		json_object* ndpi_json = ndpi.getJSONObject(iface);
+		json_object* ndpi_json = ndpi.getJSONObject(iface,false);
 		if (ndpi_json) {
 			json_object_object_add(my_object, "ndpi", ndpi_json);
 		}
