@@ -317,7 +317,7 @@ u_int GenericHash::purgeIdle(bool force_idle) {
     if(table[i] != NULL) {
       GenericHashEntry *head, *prev = NULL;
 
-      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[purge] Locking %d", i);
+      // ntop->getTrace()->traceEvent(TRACE_NORMAL, "[purge] Locking hash_id:%d", i);
       if(!locks[i]->trywrlock(__FILE__, __LINE__))
 	continue; /* Busy, will retry next round */
 
