@@ -1888,7 +1888,7 @@ bool Flow::is_hash_entry_state_idle_transition_ready() const {
 
 void Flow::periodic_hash_entry_state_update(void *user_data) {
 
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "enter Flow::periodic_hash_entry_state_update()");//增加调试代码用于监视执行“流导出”操作，add by rwp 2010
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "enter Flow::periodic_hash_entry_state_update(), flow[key:%u,state:%u]",key(),get_state());//增加调试代码用于监视执行“流导出”操作，add by rwp 2010
   periodic_ht_state_update_user_data_t *periodic_ht_state_update_user_data = (periodic_ht_state_update_user_data_t*)user_data;
   struct timeval *tv = periodic_ht_state_update_user_data->tv;
 
@@ -1896,6 +1896,8 @@ void Flow::periodic_hash_entry_state_update(void *user_data) {
   case hash_entry_state_allocated:
   case hash_entry_state_flow_notyetdetected:
     /* Nothing to do here */
+	// 这两个状态也输出---add by rwp 20200320 
+	periodic_dump_check(tv);
     break;
 
   case hash_entry_state_flow_protocoldetected:
@@ -1952,7 +1954,7 @@ char* Flow::serialize(bool es_json) {
     if((my_object = flow2json()) != NULL) {
 
       /* JSON string */
-      rsp = strdup(json_object_to_json_string(my_object));
+      rsp = strdup(json_object_to_json_string_ext(my_object, JSON_C_TO_STRING_PLAIN));
 
       /* Free memory */
       json_object_put(my_object);
@@ -1962,7 +1964,7 @@ char* Flow::serialize(bool es_json) {
     /* JSON string */
     ntop->getPrefs()->set_json_symbolic_labels_format(/*false*/true);//按填写标签名方便查看，modify by rwp20200220 
     my_object = flow2json();
-    rsp = strdup(json_object_to_json_string(my_object));
+    rsp = strdup(json_object_to_json_string_ext(my_object, JSON_C_TO_STRING_PLAIN));
     ntop->getTrace()->traceEvent(TRACE_DEBUG, "Emitting Flow: %s", rsp);
 
     /* Free memory */
@@ -2086,7 +2088,17 @@ json_object* Flow::flow2json() {
 			 json_object_new_int64(get_partial_packets_srv2cli()));
   json_object_object_add(my_object, Utils::jsonLabel(OUT_BYTES, "OUT_BYTES", jsonbuf, sizeof(jsonbuf)),
 			 json_object_new_int64(get_partial_bytes_srv2cli()));
+  //装置加总包数好检查其增长趋势---add by rwp 20200324
+  json_object_object_add(my_object, "SUM_IN_PKTS",
+	  json_object_new_int64(get_packets_cli2srv()));
+  json_object_object_add(my_object,"SUM_IN_BYTES",
+	  json_object_new_int64(get_bytes_cli2srv()));
 
+  json_object_object_add(my_object, "SUM_OUT_PKTS",
+	  json_object_new_int64(get_packets_srv2cli()));
+  json_object_object_add(my_object, "SUM_OUT_BYTES",
+	  json_object_new_int64(get_bytes_srv2cli()));
+  
   json_object_object_add(my_object, Utils::jsonLabel(FIRST_SWITCHED, "FIRST_SWITCHED", jsonbuf, sizeof(jsonbuf)),
 			 json_object_new_int((u_int32_t)get_partial_first_seen()));
   json_object_object_add(my_object, Utils::jsonLabel(LAST_SWITCHED, "LAST_SWITCHED", jsonbuf, sizeof(jsonbuf)),
@@ -2099,13 +2111,16 @@ json_object* Flow::flow2json() {
 					Utils::jsonLabel(SRC_VLAN, "SRC_VLAN", jsonbuf, sizeof(jsonbuf)),
 					json_object_new_int(vlanId));
 
+  /*--不再上送延迟信息---modify by rwp 20200324
   if(protocol == IPPROTO_TCP) {
     json_object_object_add(my_object, Utils::jsonLabel(CLIENT_NW_LATENCY_MS, "CLIENT_NW_LATENCY_MS", jsonbuf, sizeof(jsonbuf)),
 			   json_object_new_double(toMs(&clientNwLatency)));
     json_object_object_add(my_object, Utils::jsonLabel(SERVER_NW_LATENCY_MS, "SERVER_NW_LATENCY_MS", jsonbuf, sizeof(jsonbuf)),
 			   json_object_new_double(toMs(&serverNwLatency)));
   }
+  
 
+  /*--不再上送位置信息---modify by rwp 20200324
   c = cli_host ? cli_host->get_country(buf, sizeof(buf)) : NULL;
   if(c) {
     json_object *location = json_object_new_array();
@@ -2135,7 +2150,7 @@ json_object* Flow::flow2json() {
       json_object_object_add(my_object, "DST_IP_LOCATION", location);
     }
   }
-
+  */
 #ifdef NTOPNG_PRO
 #ifndef HAVE_NEDGE
   // Traffic profile information, if any
@@ -4305,6 +4320,10 @@ void Flow::performLuaCalls(const struct timeval *tv, periodic_ht_state_update_us
     /* Update the hosts status */
     if(cli_host) cli_host->setAnomalousFlowsStatusMap(status_map, true);
     if(srv_host) srv_host->setAnomalousFlowsStatusMap(status_map, false);
+  }
+
+  if (cur_state != get_state())  {
+	  ntop->getTrace()->traceEvent(TRACE_WARNING, "[performLuaCalls] state[%d-->%d] changed",cur_state,get_state());
   }
 }
 
