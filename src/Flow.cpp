@@ -1850,6 +1850,8 @@ void Flow::set_hash_entry_state_idle() {
 #endif
   }
 
+  ntop->getTrace()->traceEvent(TRACE_NORMAL, "set_hash_entry_state_idle flow[key:%u]", key());
+
   GenericHashEntry::set_hash_entry_state_idle();
 }
 
@@ -1876,7 +1878,8 @@ bool Flow::is_hash_entry_state_idle_transition_ready() const {
        /* Flows won't expire if less than DONT_NOT_EXPIRE_BEFORE_SEC old */
        && iface->getTimeLastPktRcvd() > doNotExpireBefore
        && isIdle(MAX_TCP_FLOW_IDLE)) {
-      /* ntop->getTrace()->traceEvent(TRACE_NORMAL, "[TCP] Early flow expire"); */
+		u_int32_t keyi = 0;
+       ntop->getTrace()->traceEvent(TRACE_NORMAL, "[TCP] Early flow(flowkey:%u,tcp_flags:%u,isThreeWayHandshakeOK:%d) expire", keyi, tcp_flags,isThreeWayHandshakeOK());
       return(true);
     }
   }
@@ -1896,7 +1899,7 @@ void Flow::periodic_hash_entry_state_update(void *user_data) {
   case hash_entry_state_allocated:
   case hash_entry_state_flow_notyetdetected:
     /* Nothing to do here */
-	// 这两个状态也输出---add by rwp 20200320 
+	// 这两个状态也输出(直接tcp首包为push时)---add by rwp 20200320 
 	periodic_dump_check(tv);
     break;
 
@@ -2118,6 +2121,7 @@ json_object* Flow::flow2json() {
     json_object_object_add(my_object, Utils::jsonLabel(SERVER_NW_LATENCY_MS, "SERVER_NW_LATENCY_MS", jsonbuf, sizeof(jsonbuf)),
 			   json_object_new_double(toMs(&serverNwLatency)));
   }
+  */
   
 
   /*--不再上送位置信息---modify by rwp 20200324
@@ -2474,7 +2478,7 @@ void Flow::updateTcpFlags(const struct bpf_timeval *when,
   NetworkStats *cli_network_stats = NULL, *srv_network_stats = NULL;
   /* Only packet-interfaces see every segment. Non-packet-interfaces
      have cumulative flags */
-  bool cumulative_flags = !getInterface()->isPacketInterface();
+  bool cumulative_flags = !getInterface()->isPacketInterface();//累积标记---comment by rwp 20200324
 
   iface->incFlagStats(flags, cumulative_flags);
 
@@ -2548,7 +2552,11 @@ void Flow::updateTcpFlags(const struct bpf_timeval *when,
       } else if((flags == TH_ACK)
 		|| (flags == (TH_ACK|TH_PUSH)) /* TCP Fast Open may contain data and PSH in the final TWH ACK */
 		) {
+
+		  //ntop->getTrace()->traceEvent(TRACE_WARNING, "this packet is ack or psh ack");
 	if((ackTime.tv_sec == 0) && (synAckTime.tv_sec > 0)) {
+
+		//ntop->getTrace()->traceEvent(TRACE_WARNING, "this packet a ");
 	  memcpy(&ackTime, when, sizeof(struct timeval));
 	  timeval_diff(&synAckTime, (struct timeval*)when, &clientNwLatency, 1);
 
@@ -2562,6 +2570,27 @@ void Flow::updateTcpFlags(const struct bpf_timeval *when,
 
 	  twh_ok = true;
 	  iface->getTcpFlowStats()->incEstablished();
+	}
+	else
+	{
+		//ntop->getTrace()->traceEvent(TRACE_WARNING, "this packet b(ackTime.tv_sec:%u,synAckTime.tv_sec:%u) ", ackTime.tv_sec, synAckTime.tv_sec);
+		if ((ackTime.tv_sec == 0) && (synAckTime.tv_sec == 0))	{
+			ntop->getTrace()->traceEvent(TRACE_WARNING, "[flags: %u][src2dst: %u] first packet is ack or psh ack", flags, src2dst_direction ? 1 : 0);
+			//在打开监视时已经在传输（未抓到syn,synack）时默认也认为“三次握手”完成(对于3wh未完成时流保留时间有限)---add by rwp 20200324
+			memcpy(&ackTime, when, sizeof(struct timeval));
+			timeval_diff(&synAckTime, (struct timeval*)when, &clientNwLatency, 1);
+
+			/* Sanity check */
+			if (clientNwLatency.tv_sec > 5)
+				memset(&clientNwLatency, 0, sizeof(clientNwLatency));
+			else if (cli_host)
+				cli_host->updateRoundTripTime(Utils::timeval2ms(&clientNwLatency));
+
+			setRtt();
+
+			twh_ok = true;
+			iface->getTcpFlowStats()->incEstablished();
+		}
 	}
 	goto not_yet;
       } else {
