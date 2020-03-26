@@ -156,6 +156,7 @@ void Host::initialize(Mac *_mac, u_int16_t _vlanId, bool init_all) {
   stats_shadow = NULL;
   data_delete_requested = false, stats_reset_requested = false;
   last_stats_reset = ntop->getLastStatsReset(); /* assume fresh stats, may be changed by deserialize */
+  gettimeofday(&last_periodic_stats_update, NULL);
   os = os_unknown;
   prefs_loaded = false;
   mud_pref = mud_recording_disabled;
@@ -782,7 +783,7 @@ const char * Host::getOSDetail(char * const buf, ssize_t buf_len) {
 /* ***************************************** */
 
 bool Host::is_hash_entry_state_idle_transition_ready() const {
-  bool res = isIdle(ntop->getPrefs()->get_host_max_idle(isLocalHost()));
+  bool res = isIdle(ntop->getPrefs()->get_host_max_idle(isLocalHost()));//一般默认主机老化时间为1分或5分钟
 
 #if DEBUG_HOST_IDLE_TRANSITION
   char buf[64];
@@ -796,8 +797,8 @@ bool Host::is_hash_entry_state_idle_transition_ready() const {
 /* ***************************************** */
 
 void Host::periodic_hash_entry_state_update(void *user_data) {
-  ntop->getTrace()->traceEvent(TRACE_DEBUG, "enter Host::periodic_hash_entry_state_update");//增加调试代码用于监视执行“主机状态更新”操作，add by rwp 2010
-  char buf[64];
+  char buf[64] = "";
+  ntop->getTrace()->traceEvent(TRACE_DEBUG, "enter Host::periodic_hash_entry_state_update, host[key:%u,ip:%s]",key(), get_ip()->print(buf, sizeof(buf)));//增加调试代码用于监视执行“主机状态更新”操作，add by rwp 2010
   periodic_ht_state_update_user_data_t *periodic_ht_state_update_user_data = (periodic_ht_state_update_user_data_t*)user_data;
 
   if(get_state() == hash_entry_state_idle) {
@@ -891,11 +892,20 @@ void Host::periodic_stats_update(void *user_data, bool quick) {
 // 		  free(rsp);
 // 	  }
 //   }
+
+  struct timeval saved_last_update;
+  memcpy(&saved_last_update, &last_periodic_stats_update, sizeof(saved_last_update));
+
+  if (!checkPeriodicStatsUpdateTime(tv))
+	  return; /* Not yet the time to perform an update */
+
   json_object* _hostJson = json_object_new_object();
   if (_hostJson)
   {
 	  json_object_object_add(_hostJson, "timestamp", json_object_new_int64(tv->tv_sec));
-	  this->getJSONObject(_hostJson);
+	  json_object_object_add(_hostJson, "pre_timestamp", json_object_new_int64(saved_last_update.tv_sec));
+	  float delta = Utils::msTimevalDiff(tv, &saved_last_update)/1000;//转换为秒时间
+	  this->getJSONObject(_hostJson, delta);
 	  /* JSON string */
 	  char* rsp = strdup(json_object_to_json_string_ext(_hostJson,JSON_C_TO_STRING_PLAIN));
 	  
@@ -913,8 +923,12 @@ void Host::periodic_stats_update(void *user_data, bool quick) {
 	   ntop->SendMq(&mqtt);
 	   free(rsp);
 	  }
+
   }
-  
+ 
+#ifdef DELTA_STATS_VALUE
+  resetHostStats();//重置计数统计
+#endif
 }
 
 /* *************************************** */
@@ -1436,7 +1450,7 @@ char* Host::get_tskey(char *buf, size_t bufsize) {
   return(k);
 }
 
-void Host::getJSONObject(json_object *my_object) {
+void Host::getJSONObject(json_object *my_object,float sec_diff) {
 	if (my_object)
 	{
 		char buf[64];
@@ -1451,8 +1465,19 @@ void Host::getJSONObject(json_object *my_object) {
 		json_object_object_add(my_object, "last_seen", json_object_new_int64(get_last_seen()));
 
 		HostStats* host_stats = this->getHostStats();
+#ifdef DELTA_STATS_VALUE
+		float thpt = host_stats->getNumBytes() / sec_diff;
+		json_object_object_add(my_object, "bytes_thpt", json_object_new_double(thpt));
+#else
 		json_object_object_add(my_object, "bytes_thpt", json_object_new_double(host_stats->getBytesThpt()));
+#endif
+
+#ifdef DELTA_STATS_VALUE
+		float pps_thpt = (host_stats->getNumPktsRcvd()+host_stats->getNumPktsSent()) / sec_diff;
+		json_object_object_add(my_object, "pkts_thpt", json_object_new_double(pps_thpt));
+#else
 		json_object_object_add(my_object, "pkts_thpt", json_object_new_double(host_stats->getPacketsThpt()));
+#endif	
 		json_object_object_add(my_object, "send_bytes", json_object_new_int64(host_stats->getNumBytesSent()));
 		json_object_object_add(my_object, "send_packets", json_object_new_int64(host_stats->getNumPktsSent()));
 		json_object_object_add(my_object, "recv_bytes", json_object_new_int64(host_stats->getNumBytesRcvd()));
@@ -1490,4 +1515,22 @@ void Host::getJSONObject(json_object *my_object) {
 			json_object_object_add(my_object, "ndpi", json_ndpi);
 		}
 	}
+}
+
+void Host::resetHostStats()
+{
+	getHostStats()->resetStats();
+}
+
+bool Host::checkPeriodicStatsUpdateTime(const struct timeval *tv) {
+	float diff = Utils::msTimevalDiff(tv, &last_periodic_stats_update) / 1000;
+	char buf[64]="";
+	ntop->getTrace()->traceEvent(TRACE_DEBUG, "Host::checkPeriodicStatsUpdateTime host(key:%u,ip:%s) diff:%.2f", key(),get_ip()->print(buf, sizeof(buf)),diff);
+	if (diff < 0 /* Need a reset */
+		|| diff >= 30) { //30秒一次，避开老化时间1分钟
+		memcpy(&last_periodic_stats_update, tv, sizeof(last_periodic_stats_update));
+		return true;
+	}
+
+	return false;
 }

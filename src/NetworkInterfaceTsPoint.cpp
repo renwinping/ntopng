@@ -81,17 +81,25 @@ json_object* NetworkInterfaceTsPoint::toJsonObject(NetworkInterface *iface)
 	//snprintf(buf, sizeof(buf), "%u", this->timestamp);
 
 	json_object_object_add(my_object, "timestamp", json_object_new_int64(timestamp));
+	json_object_object_add(my_object, "pre_timestamp", json_object_new_int64(pretimestamp));
 	json_object_object_add(my_object, "INTERFACE", json_object_new_string(iface->get_name()));
 	json_object_object_add(my_object, "packets", json_object_new_int64(ethStats.getNumPackets()));
 	json_object_object_add(my_object, "bytes", json_object_new_int64(ethStats.getNumBytes()));
+#ifdef DELTA_STATS_VALUE
+	float delta = abs(timestamp - pretimestamp);//转换为秒时间
+	float thpt = ethStats.getNumBytes() / delta;
+	json_object_object_add(my_object, "throughput_bps", json_object_new_double(thpt));
+	float pps_thpt = ethStats.getNumPackets() / delta;
+	json_object_object_add(my_object, "throughput_pps", json_object_new_double(pps_thpt));
+#else
 	json_object_object_add(my_object, "throughput_bps", json_object_new_double(bytes_thpt.getThpt()));
 	json_object_object_add(my_object, "throughput_pps", json_object_new_double(pkts_thpt.getThpt()));
+#endif
 
 	json_object_object_add(my_object, "hosts", json_object_new_int64(hosts));
 	//json_object_object_add(my_object, "local_hosts", json_object_new_int64(local_hosts));
 	//json_object_object_add(my_object, "devices", json_object_new_int64(devices));
 	json_object_object_add(my_object, "flows", json_object_new_int64(flows));
-
 
 
 	//添加ndpi统计JSON
@@ -147,4 +155,9 @@ char* NetworkInterfaceTsPoint::serialize() {
 	else
 		rsp = NULL;
 	return(rsp);
+}
+
+void NetworkInterfaceTsPoint::setPreTime(time_t oldtime)
+{
+	pretimestamp = oldtime;
 }

@@ -352,7 +352,7 @@ u_int GenericHash::purgeIdle(bool force_idle) {
 	  if(force_idle
 	     || (head->is_hash_entry_state_idle_transition_possible()
 			 && head->is_hash_entry_state_idle_transition_ready())) {
-		  ntop->getTrace()->traceEvent(TRACE_NORMAL, "active state's hash[key:%u] ready to set idle", head->key());
+		  ntop->getTrace()->traceEvent(TRACE_NORMAL, "hashtable[name:%s] active state's hash[key:%u] ready to set idle", getName(),head->key());
 	  detach_idle_hash_entry:
 	    idle_entries_shadow->push_back(head);
 

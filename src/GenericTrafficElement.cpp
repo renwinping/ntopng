@@ -46,6 +46,9 @@ void GenericTrafficElement::resetStats() {
   pkts_thpt.resetStats();
   tcp_packet_stats_sent = TcpPacketStats();
   tcp_packet_stats_rcvd = TcpPacketStats();
+  if (ndpiStats)  {
+	  ndpiStats->resetStats();
+  }
 }
 
 /* *************************************** */

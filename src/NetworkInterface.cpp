@@ -2614,6 +2614,9 @@ void NetworkInterface::periodicStatsUpdate() {
   periodicUpdateInitTime(&tv);
   periodic_stats_update_user_data.tv = &tv;
     
+  struct timeval saved_last_update;
+  memcpy(&saved_last_update, &last_periodic_stats_update, sizeof(saved_last_update));
+
   if(!checkPeriodicStatsUpdateTime(&tv))
     return; /* Not yet the time to perform an update */
 
@@ -2703,6 +2706,7 @@ void NetworkInterface::periodicStatsUpdate() {
 	  ntop->getTrace()->traceEvent(TRACE_NORMAL, "@@@@@@@@networkinterface 's Timeseries insert a point(time:%u)", tv.tv_sec);
 #endif
     NetworkInterfaceTsPoint *pt = new NetworkInterfaceTsPoint();
+	pt->setPreTime(saved_last_update.tv_sec);
     makeTsPoint(pt);
 
     /* Ownership of the point is passed to the ring */
@@ -2734,6 +2738,11 @@ void NetworkInterface::periodicStatsUpdate() {
   gettimeofday(&tdebug, NULL);
   ntop->getTrace()->traceEvent(TRACE_NORMAL, "Stats update done [took: %d]", tdebug.tv_sec - tdebug_init.tv_sec);
 #endif
+
+#ifdef DELTA_STATS_VALUE
+  resetInterfaceStats();//复归统计数据
+#endif
+
 }
 
 /* **************************************************** */
@@ -7797,3 +7806,16 @@ void NetworkInterface::unlockExternalAlertable(AlertableEntity *alertable) {
 struct ndpi_detection_module_struct* NetworkInterface::get_ndpi_struct() const {
   return(ntop->get_ndpi_struct());
 };
+
+void NetworkInterface::resetInterfaceStats()
+{
+	//bytes_thpt.resetStats();//吞吐率为平均值无须重置，否则起码要两次更新才有值，只更新一次则为零
+	//pkts_thpt.resetStats();
+	tcpFlowStats.resetStats(), ethStats.cleanup(), localStats.resetStats(),
+		pktStats.resetStats(), tcpPacketStats.resetStats(),
+		discardedProbingStats.reset();
+	l4Stats.resetStats();
+
+	if (ndpiStats)
+		ndpiStats->resetStats();
+}

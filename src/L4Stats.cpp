@@ -117,24 +117,24 @@ void L4Stats::incStats(time_t when, u_int8_t l4_proto,
 string L4Stats::stringableStats() {
 	string string_Stats = "";
 	char tempChar_[256] = "";
-	snprintf(tempChar_, 255, "tcp.packets.sent=%d\n", tcp_sent.getNumPkts()); string_Stats += tempChar_;
-	snprintf(tempChar_,255, "tcp.packets.rcvd=%d\n", tcp_rcvd.getNumPkts()); string_Stats += tempChar_;
-	snprintf(tempChar_,255, "tcp.bytes.sent=%d\n", tcp_sent.getNumBytes()); string_Stats += tempChar_;
-	snprintf(tempChar_,255, "tcp.bytes.rcvd=%d\n", tcp_rcvd.getNumBytes()); string_Stats += tempChar_;
+	snprintf(tempChar_, 255, "tcp.packets.sent=%u\n", tcp_sent.getNumPkts()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "tcp.packets.rcvd=%u\n", tcp_rcvd.getNumPkts()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "tcp.bytes.sent=%u\n", tcp_sent.getNumBytes()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "tcp.bytes.rcvd=%u\n", tcp_rcvd.getNumBytes()); string_Stats += tempChar_;
 
-	snprintf(tempChar_,255, "udp.packets.sent=%d\n", udp_sent.getNumPkts()); string_Stats += tempChar_;
-	snprintf(tempChar_,255, "udp.bytes.sent=%d\n", udp_sent.getNumBytes()); string_Stats += tempChar_;
-	snprintf(tempChar_,255, "udp.packets.rcvd=%d\n", udp_rcvd.getNumPkts()); string_Stats += tempChar_;
-	snprintf(tempChar_,255, "udp.bytes.rcvd=%d\n", udp_rcvd.getNumBytes()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "udp.packets.sent=%u\n", udp_sent.getNumPkts()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "udp.bytes.sent=%u\n", udp_sent.getNumBytes()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "udp.packets.rcvd=%u\n", udp_rcvd.getNumPkts()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "udp.bytes.rcvd=%u\n", udp_rcvd.getNumBytes()); string_Stats += tempChar_;
 
-	snprintf(tempChar_,255, "icmp.packets.sent=%d\n", icmp_sent.getNumPkts()); string_Stats += tempChar_;
-	snprintf(tempChar_,255, "icmp.bytes.sent=%d\n", icmp_sent.getNumBytes()); string_Stats += tempChar_;
-	snprintf(tempChar_,255, "icmp.packets.rcvd=%d\n", icmp_rcvd.getNumPkts()); string_Stats += tempChar_;
-	snprintf(tempChar_,255, "icmp.bytes.rcvd=%d\n", icmp_rcvd.getNumBytes()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "icmp.packets.sent=%u\n", icmp_sent.getNumPkts()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "icmp.bytes.sent=%u\n", icmp_sent.getNumBytes()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "icmp.packets.rcvd=%u\n", icmp_rcvd.getNumPkts()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "icmp.bytes.rcvd=%u\n", icmp_rcvd.getNumBytes()); string_Stats += tempChar_;
 
-	snprintf(tempChar_,255, "other_ip.packets.sent=%d\n", other_ip_sent.getNumPkts()); string_Stats += tempChar_;
-	snprintf(tempChar_,255, "other_ip.bytes.sent=%d\n", other_ip_sent.getNumBytes()); string_Stats += tempChar_;
-	snprintf(tempChar_,255, "other_ip.packets.rcvd=%d\n", other_ip_rcvd.getNumPkts()); string_Stats += tempChar_;
-	snprintf(tempChar_,255, "other_ip.bytes.rcvd=%d\n", other_ip_rcvd.getNumBytes()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "other_ip.packets.sent=%u\n", other_ip_sent.getNumPkts()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "other_ip.bytes.sent=%u\n", other_ip_sent.getNumBytes()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "other_ip.packets.rcvd=%u\n", other_ip_rcvd.getNumPkts()); string_Stats += tempChar_;
+	snprintf(tempChar_,255, "other_ip.bytes.rcvd=%u\n", other_ip_rcvd.getNumBytes()); string_Stats += tempChar_;
 	return string_Stats;
 }
