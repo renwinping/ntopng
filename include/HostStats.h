@@ -109,6 +109,9 @@ class HostStats: public TimeseriesStats {
   virtual DnsStats*  getDNSstats()   const { return(NULL); }
   virtual ICMPstats* getICMPstats()  const { return(NULL); }
   virtual PacketStats*  getPacketStats(bool isSend)   { return (isSend ? (&sent_stats) : (&recv_stats)); }
+  inline void resetStats() {
+	  sent_stats.resetStats(); recv_stats.resetStats(); getL4Stats()->resetStats(); getnDPIStats()->resetStats(); GenericTrafficElement::resetStats();
+  }
 };
 
 #endif

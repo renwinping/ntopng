@@ -46,6 +46,9 @@ class LocalTrafficStats {
   json_object* getJSONObject();
   void lua(lua_State* vm);  
   inline void sum(LocalTrafficStats *l) const { _sum(&l->packets, &packets), _sum(&l->bytes, &bytes); };
+  inline void resetStats() {
+	  memset(&packets, 0, sizeof(packets)); memset(&bytes, 0, sizeof(bytes));
+  };
 };
 
 #endif /* _LOCAL_TRAFFIC_STATS_H_ */

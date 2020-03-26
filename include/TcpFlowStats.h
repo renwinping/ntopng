@@ -44,6 +44,7 @@ class TcpFlowStats {
     s->numSynFlows += numSynFlows, s->numEstablishedFlows += numEstablishedFlows,
       s->numResetFlows += numResetFlows, s->numFinFlows += numFinFlows;
   };
+  inline void resetStats(){ numSynFlows=numEstablishedFlows=numResetFlows=numFinFlows=0; }
 };
 
 #endif /* _TCP_FLOW_STATS_H_ */

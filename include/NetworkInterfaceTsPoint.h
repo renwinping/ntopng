@@ -27,6 +27,7 @@
 /* This is manually populated by NetworkInterface::makeTsPoint */
 class NetworkInterfaceTsPoint: public TimeseriesPoint {
  public:
+  time_t pretimestamp;
   nDPIStats ndpi;
   LocalTrafficStats local_stats;
   u_int hosts, local_hosts;
@@ -45,6 +46,7 @@ class NetworkInterfaceTsPoint: public TimeseriesPoint {
   string json();
   json_object* toJsonObject(NetworkInterface *iface);
   char* serialize();
+  void  setPreTime(time_t oldtime);
 };
 
 #endif /* _NETWORK_INTERFACE_TS_POINT_H_ */

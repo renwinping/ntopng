@@ -46,6 +46,10 @@ class TcpPacketStats {
     s->pktRetr += pktRetr, s->pktOOO += pktOOO,
       s->pktLost += pktLost, s->pktKeepAlive += pktKeepAlive;
   }
+
+  inline void resetStats() {
+	  pktRetr=pktOOO=pktLost=pktKeepAlive=0;
+  }
 };
 
 #endif /* _TCP_PACKET_STATS_H_ */

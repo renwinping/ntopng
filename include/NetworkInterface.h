@@ -356,7 +356,7 @@ class NetworkInterface : public AlertableEntity {
   inline bool hasSeenContainers() const        { return(has_seen_containers); }
   inline void setSeenContainers()              { has_seen_containers = true; }
   struct ndpi_detection_module_struct* get_ndpi_struct() const;
-  inline bool is_purge_idle_interface()        { return(purge_idle_flows_hosts);               };
+  inline bool is_purge_idle_interface() { return(purge_idle_flows_hosts); };
   int dumpFlow(time_t when, Flow *f);
 #ifdef NTOPNG_PRO
   void dumpAggregatedFlow(time_t when, AggregatedFlow *f, bool is_top_aggregated_flow, bool is_top_cli, bool is_top_srv);
@@ -824,6 +824,7 @@ class NetworkInterface : public AlertableEntity {
   virtual bool reproducePcapOriginalSpeed() const         { return(false); }
   u_int32_t getNumEngagedAlerts();
   void releaseAllEngagedAlerts();
+  void resetInterfaceStats();
 };
 
 #endif /* _NETWORK_INTERFACE_H_ */

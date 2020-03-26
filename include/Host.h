@@ -26,6 +26,7 @@
 
 class Host : public GenericHashEntry, public AlertableEntity {
  protected:
+  struct timeval last_periodic_stats_update;
   IpAddress ip;
   Mac *mac;
   char *asname;
@@ -220,7 +221,7 @@ class Host : public GenericHashEntry, public AlertableEntity {
   char* get_hostkey(char *buf, u_int buf_len, bool force_vlan=false);
   char* get_tskey(char *buf, size_t bufsize);
 
-  void getJSONObject(json_object *my_object);
+  void getJSONObject(json_object *my_object, float sec_diff);
   bool is_hash_entry_state_idle_transition_ready() const;
   void periodic_hash_entry_state_update(void *user_data);
   void periodic_stats_update(void *user_data, bool quick);
@@ -379,6 +380,9 @@ class Host : public GenericHashEntry, public AlertableEntity {
       return(os);
     return(os_unknown);
   }
+
+  void resetHostStats();
+  bool checkPeriodicStatsUpdateTime(const struct timeval *tv);
 };
 
 #endif /* _HOST_H_ */

@@ -17,6 +17,10 @@ class L4Stats {
   void incStats(time_t when, u_int8_t l4_proto,
         u_int64_t rcvd_packets, u_int64_t rcvd_bytes,
         u_int64_t sent_packets, u_int64_t sent_bytes);
+  inline void resetStats() {
+	  tcp_sent.resetStats(); tcp_rcvd.resetStats(); udp_sent.resetStats(); udp_rcvd.resetStats();
+	  icmp_sent.resetStats(); icmp_rcvd.resetStats(); other_ip_rcvd.resetStats(); other_ip_rcvd.resetStats();
+  }
 };
 
 #endif
