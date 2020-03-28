@@ -7070,9 +7070,10 @@ void NetworkInterface::makeTsPoint(NetworkInterfaceTsPoint *pt) {
   EthStats _ethStats;
   ProtoStats _discardedProbingStats;
 
-  sumStats(&_tcpFlowStats, &_ethStats, &pt->local_stats,
+  //ntop->getTrace()->traceEvent(TRACE_DEBUG, "point:getNumBytes(%u),getNumPackets(%u)", pt->ethStats.getNumBytes(), pt->ethStats.getNumPackets());
+  sumStats(&_tcpFlowStats, &pt->ethStats, &pt->local_stats,
 	   &pt->ndpi, &pt->packetStats, &pt->tcpPacketStats, &_discardedProbingStats);
-
+  //ntop->getTrace()->traceEvent(TRACE_DEBUG, "after point:getNumBytes(%u),getNumPackets(%u)", pt->ethStats.getNumBytes(), pt->ethStats.getNumPackets());
   pt->engaged_alerts = getNumEngagedAlerts();
   pt->hosts = getNumHosts();
   pt->local_hosts = getNumLocalHosts();
@@ -7080,7 +7081,7 @@ void NetworkInterface::makeTsPoint(NetworkInterfaceTsPoint *pt) {
   pt->flows = getNumFlows();
   pt->http_hosts = getNumHTTPHosts();
   pt->l4Stats = l4Stats;
-  pt->ethStats = ethStats;//add by rwp 20200223
+  //pt->ethStats = ethStats;//add by rwp 20200223
   pt->bytes_thpt = bytes_thpt;
   pt->pkts_thpt = pkts_thpt;
 
@@ -7811,9 +7812,14 @@ void NetworkInterface::resetInterfaceStats()
 {
 	//bytes_thpt.resetStats();//吞吐率为平均值无须重置，否则起码要两次更新才有值，只更新一次则为零
 	//pkts_thpt.resetStats();
-	tcpFlowStats.resetStats(), ethStats.cleanup(), localStats.resetStats(),
-		pktStats.resetStats(), tcpPacketStats.resetStats(),
-		discardedProbingStats.reset();
+	tcpFlowStats.resetStats();
+	//ntop->getTrace()->traceEvent(TRACE_DEBUG, "numBytes:%u,numPackets:%u", getNumBytes(), getNumPackets());
+	ethStats.cleanup();
+	//ntop->getTrace()->traceEvent(TRACE_DEBUG, "numBytes:%u,numPackets:%u", getNumBytes(), getNumPackets());
+	localStats.resetStats();
+	pktStats.resetStats();
+	tcpPacketStats.resetStats();
+	discardedProbingStats.reset();
 	l4Stats.resetStats();
 
 	if (ndpiStats)
