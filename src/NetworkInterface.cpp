@@ -527,7 +527,7 @@ NetworkInterface::~NetworkInterface() {
     for (u_int i = 0; i < PROFILING_NUM_SECTIONS; i++) {
       if(PROFILING_SECTION_LABEL(i) != NULL)
         ntop->getTrace()->traceEvent(TRACE_NORMAL, "[PROFILING] Section #%d '%s': AVG %llu ticks",
-          i, PROFILING_SECTION_LABEL(i), PROFILING_SECTION_AVG(i, n));
+          i, PROFILING_SECTION_LABEL(i), PROFILING_SECTION_AVG(i, n));//打印监视区的程序执行时间
     }
   }
 #endif
