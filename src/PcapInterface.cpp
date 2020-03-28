@@ -436,6 +436,11 @@ bool PcapInterface::set_packet_filter(char *filter) {
 /* **************************************************** */
 
 void PcapInterface::updateDirectionStats() {
+
+	//由于采用“时间片（定时重置）”方式上送，此处不应再执行避免数据恢复为总数而非时间段的统计值。---add by rwp 20200328
+	return;
+
+	///
   ProtoStats current_stats_in, current_stats_out;
 
   if(emulate_traffic_directions &&
