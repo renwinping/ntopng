@@ -2039,25 +2039,28 @@ json_object* Flow::flow2json() {
 			     json_object_new_string(Utils::formatMac(srv_host ? srv_host->get_mac() : NULL, buf, sizeof(buf))));
   }
 
+  //添加一个前次上送时间
+  json_object_object_add(my_object, "pre_timestamp", json_object_new_int64(this->get_partial_first_seen()));
+
   //添加一个"流key"方便比较同一“流”---comment by rwp 20200229
   json_object_object_add(my_object, "flowKey", json_object_new_int64(key()));
 
   if(cli_ip) {
     if(cli_ip->isIPv4()) {
-      json_object_object_add(my_object, Utils::jsonLabel(IPV4_SRC_ADDR, "IPV4_SRC_ADDR", jsonbuf, sizeof(jsonbuf)),
+      json_object_object_add(my_object, Utils::jsonLabel(IPV4_SRC_ADDR, "IP_SRC_ADDR", jsonbuf, sizeof(jsonbuf)),
 			     json_object_new_string(cli_ip->print(buf, sizeof(buf))));
     } else if(cli_ip->isIPv6()) {
-      json_object_object_add(my_object, Utils::jsonLabel(IPV6_SRC_ADDR, "IPV6_SRC_ADDR", jsonbuf, sizeof(jsonbuf)),
+      json_object_object_add(my_object, Utils::jsonLabel(IPV6_SRC_ADDR, "IP_SRC_ADDR", jsonbuf, sizeof(jsonbuf)),
 			     json_object_new_string(cli_ip->print(buf, sizeof(buf))));
     }
   }
 
   if(srv_ip) {
     if(srv_ip->isIPv4()) {
-      json_object_object_add(my_object, Utils::jsonLabel(IPV4_DST_ADDR, "IPV4_DST_ADDR", jsonbuf, sizeof(jsonbuf)),
+      json_object_object_add(my_object, Utils::jsonLabel(IPV4_DST_ADDR, "IP_DST_ADDR", jsonbuf, sizeof(jsonbuf)),
 			     json_object_new_string(srv_ip->print(buf, sizeof(buf))));
     } else if(srv_ip->isIPv6()) {
-      json_object_object_add(my_object, Utils::jsonLabel(IPV6_DST_ADDR, "IPV6_DST_ADDR", jsonbuf, sizeof(jsonbuf)),
+      json_object_object_add(my_object, Utils::jsonLabel(IPV6_DST_ADDR, "IP_DST_ADDR", jsonbuf, sizeof(jsonbuf)),
 			     json_object_new_string(srv_ip->print(buf, sizeof(buf))));
     }
   }
