@@ -2077,8 +2077,10 @@ json_object* Flow::flow2json() {
      || (ndpiDetectedProtocol.app_protocol != NDPI_PROTOCOL_UNKNOWN)) {
     json_object_object_add(my_object, Utils::jsonLabel(L7_PROTO, "L7_PROTO", jsonbuf, sizeof(jsonbuf)),
 			   json_object_new_int(ndpiDetectedProtocol.app_protocol));
+
+	char *name = iface->get_ndpi_proto_name(ndpiDetectedProtocol.app_protocol);
     json_object_object_add(my_object, Utils::jsonLabel(L7_PROTO_NAME, "L7_PROTO_NAME", jsonbuf, sizeof(jsonbuf)),
-			   json_object_new_string(get_detected_protocol_name(buf, sizeof(buf))));
+			   json_object_new_string(/*get_detected_protocol_name(buf, sizeof(buf))*/name));
   }
 
   if(protocol == IPPROTO_TCP)
