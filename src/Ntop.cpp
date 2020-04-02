@@ -2643,10 +2643,14 @@ int Ntop::registerMqttCli() {
 
 int Ntop::SendMq(ASDUMESSGE* pMsg)
 {
+	int ret=0;
 	if ((m_pLocalCom)&&(pMsg))
 	{
 		//printf("SendMq msg(_top:%s)\n", pMsg->topic.c_str());
-		m_pLocalCom->send(*pMsg);
+		ret = m_pLocalCom->send(*pMsg);
+		if (ret != 0)		{
+			getTrace()->traceEvent(TRACE_WARNING,"send mqtt message failed ret:%d", ret);
+		}
 	}
 	return 0;
 }
