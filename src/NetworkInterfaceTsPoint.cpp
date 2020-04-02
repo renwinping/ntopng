@@ -80,6 +80,7 @@ json_object* NetworkInterfaceTsPoint::toJsonObject(NetworkInterface *iface)
 	//时间JSON
 	//snprintf(buf, sizeof(buf), "%u", this->timestamp);
 
+
 	json_object_object_add(my_object, "timestamp", json_object_new_int64(timestamp));
 	json_object_object_add(my_object, "pre_timestamp", json_object_new_int64(pretimestamp));
 	json_object_object_add(my_object, "INTERFACE", json_object_new_string(iface->get_name()));
@@ -101,6 +102,8 @@ json_object* NetworkInterfaceTsPoint::toJsonObject(NetworkInterface *iface)
 	//json_object_object_add(my_object, "devices", json_object_new_int64(devices));
 	json_object_object_add(my_object, "flows", json_object_new_int64(flows));
 
+	static u_int32_t if_send_json_id = 0;
+	json_object_object_add(my_object, "json_id", json_object_new_int64(if_send_json_id++));
 
 	//添加ndpi统计JSON
 // 	json_object*  ndpi_json = ndpi.getJSONObject(if);

@@ -1982,7 +1982,7 @@ char* Flow::serialize(bool es_json) {
 json_object* Flow::flow2json() {
   
 
-
+	static u_int32_t flow_send_id = 0;
   json_object *my_object;
   char buf[64], jsonbuf[64], *c;
   time_t t;
@@ -2040,7 +2040,7 @@ json_object* Flow::flow2json() {
   }
 
   //添加一个前次上送时间
-  json_object_object_add(my_object, "pre_timestamp", json_object_new_int64(this->get_partial_first_seen()));
+  json_object_object_add(my_object, "json_id", json_object_new_int64(flow_send_id++));
 
   //添加一个"流key"方便比较同一“流”---comment by rwp 20200229
   json_object_object_add(my_object, "flowKey", json_object_new_int64(key()));

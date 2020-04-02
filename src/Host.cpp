@@ -1464,6 +1464,8 @@ void Host::getJSONObject(json_object *my_object,float sec_diff) {
 		json_object_object_add(my_object, "first_seen", json_object_new_int64(get_first_seen()));
 		json_object_object_add(my_object, "last_seen", json_object_new_int64(get_last_seen()));
 
+		static u_int32_t host_send_json_id = 0;
+		json_object_object_add(my_object, "json_id", json_object_new_int64(host_send_json_id++));
 		HostStats* host_stats = this->getHostStats();
 #ifdef DELTA_STATS_VALUE
 		float thpt = host_stats->getNumBytes() / sec_diff;
