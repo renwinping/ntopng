@@ -21,16 +21,6 @@ class L4Stats {
 	  tcp_sent.resetStats(); tcp_rcvd.resetStats(); udp_sent.resetStats(); udp_rcvd.resetStats();
 	  icmp_sent.resetStats(); icmp_rcvd.resetStats(); other_ip_sent.resetStats(); other_ip_rcvd.resetStats();
   }
-  L4Stats &operator=(const L4Stats &rth)
-  {
-	  copyObject(rth);
-	  return *this;
-  }
-
-  void copyObject(const L4Stats &rh)
-  {
-
-  }
 };
 
 #endif
