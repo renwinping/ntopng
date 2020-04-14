@@ -633,8 +633,10 @@ int NetworkInterface::dumpFlow(time_t when, Flow *f) {
 	mqtt.topic = "/data/dfi/flow_stats_json";
 
 	//转换为带时标的JSON以便平台入库
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
 	char timeStr[100];
-	snprintf(timeStr, sizeof(timeStr),"{ \"timestamp\": %lu,", when);
+	snprintf(timeStr, sizeof(timeStr),"{ \"timestamp\": %lu,", tv.tv_sec);
 	string _pl = timeStr;
 	char* cutHeadPtr = (json + 1);
 	_pl += cutHeadPtr;
