@@ -552,10 +552,11 @@ void Prefs::reloadPrefsFromRedis() {
     other_rrd_raw_days  = getDefaultPrefsValue(CONST_OTHER_RRD_RAW_DAYS, OTHER_RRD_RAW_DAYS),
     other_rrd_1min_days = getDefaultPrefsValue(CONST_OTHER_RRD_1MIN_DAYS, OTHER_RRD_1MIN_DAYS),
     other_rrd_1h_days   = getDefaultPrefsValue(CONST_OTHER_RRD_1H_DAYS, OTHER_RRD_1H_DAYS),
-    other_rrd_1d_days   = getDefaultPrefsValue(CONST_OTHER_RRD_1D_DAYS, OTHER_RRD_1D_DAYS),
-    ts_num_steps        = getDefaultPrefsValue(CONST_RUNTIME_TS_NUM_STEPS, CONST_DEFAULT_TS_NUM_STEPS);
-    num_ts_slots        = getDefaultPrefsValue(CONST_RUNTIME_TS_NUM_SLOTS, CONST_DEFAULT_TS_NUM_SLOTS);
-
+    other_rrd_1d_days   = getDefaultPrefsValue(CONST_OTHER_RRD_1D_DAYS, OTHER_RRD_1D_DAYS);
+	int32_t  ts_num_steps_redis        = getDefaultPrefsValue(CONST_RUNTIME_TS_NUM_STEPS, CONST_DEFAULT_TS_NUM_STEPS);
+	ts_num_steps = (ts_num_steps_redis ? ts_num_steps_redis : ts_num_steps);
+	int32_t num_ts_slots_redis         = getDefaultPrefsValue(CONST_RUNTIME_TS_NUM_SLOTS, CONST_DEFAULT_TS_NUM_SLOTS);
+	num_ts_slots = (num_ts_slots_redis ? num_ts_slots_redis : num_ts_slots);
     enable_top_talkers              = getDefaultBoolPrefsValue(CONST_TOP_TALKERS_ENABLED,
 							       CONST_DEFAULT_TOP_TALKERS_ENABLED),
     enable_idle_local_hosts_cache   = getDefaultBoolPrefsValue(CONST_RUNTIME_IDLE_LOCAL_HOSTS_CACHE_ENABLED,
